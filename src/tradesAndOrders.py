@@ -117,25 +117,27 @@ async def get_dividends(client):
 
 async def get_fiat_deposits():
     deposits = await binance_fiat_deposits()
-    print(deposits)
+
     print("\nGETTING FIAT DEPOSITS...")
     sql_max = "SELECT count(orderNo) FROM crypto.fiatDeposits"
     cursor.execute(sql_max)
-    dep_db = cursor.fetchall()[0][0]
-
-    if not dep_db:
-        from_d = 0
+    dep_db = cursor.fetchall()
+    if deposits is None:
+        print("NO FIAT DEPOSITS")
     else:
-        from_d = dep_db[0][0]
+        if not dep_db:
+            from_d = 0
+        else:
+            from_d = dep_db[0][0]
 
-    to_final = deposits["total"] - from_d
+        to_final = deposits["total"] - from_d
+        print("YOU HAVE GOT " + str(to_final) + " NEW DEPOSITS")
+        for i in range(from_d, to_final):
+            sql = "INSERT INTO crypto.fiatDeposits VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, list((deposits["data"][i]).values()))
 
-    for i in range(from_d, to_final):
-        print(deposits["data"][i])
-        sql = "INSERT INTO crypto.fiatDeposits VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute(sql, list((deposits["data"][i]).values()))
+        my_db.commit()
 
-    my_db.commit()
     print("\n##############################################\n")
 
 
@@ -144,18 +146,22 @@ async def get_fiat_withdraws():
     print("\nGETTING FIAT WITHDRAWS...")
     sql_max = "SELECT count(orderNo) FROM crypto.fiatWithdraws"
     cursor.execute(sql_max)
-    wd_db = cursor.fetchall()[0][0]
+    wd_db = cursor.fetchall()
 
-    if not wd_db:
-        to_final = 0
+    if withdraws is None:
+        print("NO FIAT WITHDRAWS")
     else:
-        to_final = withdraws["total"] - wd_db
+        if wd_db is None:
+            to_final = 0
+        else:
+            to_final = withdraws["total"] - wd_db[0][0]
+        print("YOU HAVE GOT " + str(to_final) + " NEW WITHDRAWS")
+        for i in range(0, to_final):
+            sql = "INSERT INTO crypto.fiatWithdraws VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(sql, list((withdraws["data"][i]).values()))
 
-    for i in range(0, to_final):
-        sql = "INSERT INTO crypto.fiatWithdraws VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-        cursor.execute(sql, list((withdraws["data"][i]).values()))
+        my_db.commit()
 
-    my_db.commit()
     print("\n##############################################\n")
 
 
@@ -167,21 +173,24 @@ async def get_fiat_orders():
     cursor.execute(sql_max)
     ord_db = cursor.fetchall()
 
-    for loop_i, typeOrder in enumerate(["sell", "buy"]):
+    if orders is None:
+        print("NO FIAT ORDERS")
+    else:
+        for loop_i, typeOrder in enumerate(["sell", "buy"]):
 
-        if not ord_db or len(ord_db) < loop_i+1:
-            from_w = 0
-        else:
-            from_w = ord_db[loop_i][0]
+            if not ord_db or len(ord_db) < loop_i+1:
+                from_w = 0
+            else:
+                from_w = ord_db[loop_i][0]
 
-        to_final = orders[typeOrder]["total"] - from_w
+            to_final = orders[typeOrder]["total"] - from_w
+            print("YOU HAVE GOT " + str(to_final) + " NEW " + typeOrder.upper())
+            for i in range(from_w, to_final):
+                val = (list((orders[typeOrder]["data"][i]).values()))
+                sql = "INSERT INTO crypto.fiatOrders VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                val.append(typeOrder)
+                cursor.execute(sql, val)
 
-        for i in range(from_w, to_final):
-            val = (list((orders[typeOrder]["data"][i]).values()))
-            sql = "INSERT INTO crypto.fiatOrders VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            val.append(typeOrder)
-            cursor.execute(sql, val)
-
-    my_db.commit()
+        my_db.commit()
 
     print("\n##############################################\n")
