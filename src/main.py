@@ -19,7 +19,7 @@ async def main():
 
     """
             elif selection == "2":
-    
+    """
     await tao.get_trades(client)
     await tao.get_orders(client)
     await tao.get_dust(client)
@@ -27,7 +27,7 @@ async def main():
     await tao.get_fiat_deposits()
     await tao.get_fiat_withdraws()
     await tao.get_fiat_orders()
-    
+    """
             elif selection == "3":
     """
     await get_assets_snap(client)
