@@ -1,9 +1,9 @@
 import time
 from datetime import datetime
-# import pandas as pd
+
 
 from database import my_db, cursor
-from simply import month_timestamp_ns, zero_day_s, day_timestamp_s
+from secrets import month_timestamp_ns, zero_day_s, day_timestamp_s
 
 
 def assets_snap_db(line):
@@ -18,7 +18,7 @@ def assets_snap_db(line):
 
 
 # Get the assets from Binance
-async def get_assets_snap(client, op_type='SPOT', file=""):
+async def get_assets_snap(client, op_type='SPOT'):
     # Creating a dictionary for the values
     snapshot = {}
 
@@ -64,11 +64,5 @@ async def get_assets_snap(client, op_type='SPOT', file=""):
             date = datetime.utcfromtimestamp(chunk['updateTime'] / 1000).strftime('%Y-%m-%d %H:%M:%S')
             snapshot[date] = assets
             assets_snap_db([date, snapshot[date]])
-
-    if file != "":
-        print("In order to use this feature you need to install and import pandas, uncomment line 3 and uncomment",
-              "the code below assets.py line 61")
-        # df = pd.DataFrame.from_dict(snapshot, orient='index')
-        # df.to_csv(file)
 
     print("\n##############################################\n")
