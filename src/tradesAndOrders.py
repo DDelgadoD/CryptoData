@@ -1,5 +1,8 @@
-from customAPI import binance_fiat_deposits, binance_fiat_withdraws, binance_fiat_orders
+from customAPI import binance_fiat_deposits, binance_fiat_orders
 from database import my_db, cursor
+from tqdm import tqdm
+
+from secrets import zero_day_ns, now_ns, sep
 
 
 def get_pairs():
@@ -49,7 +52,7 @@ async def get_trades(client):
                     cursor.execute(sql, val)
 
     my_db.commit()
-    print("\n##############################################\n")
+    print(sep)
 
 
 async def get_orders(client):
@@ -75,7 +78,7 @@ async def get_orders(client):
                     cursor.execute(sql_or, val_or)
 
     my_db.commit()
-    print("\n##############################################\n")
+    print(sep)
 
 
 async def get_dust(client):
@@ -93,28 +96,37 @@ async def get_dust(client):
         cursor.execute(sql, list(details.values()))
 
     my_db.commit()
-    print("\n##############################################\n")
+    print(sep)
 
 
-async def get_dividends(client):
-    div = await client.get_asset_dividend_history(limit=500)
-    print("\nGETTING DIVIDENDS...")
-    sql_max = "SELECT count(tranId) FROM crypto.dividends"
+async def get_dividends(client, values=6):
+    sql_max = "SELECT max(divTime) FROM crypto.dividends"
     cursor.execute(sql_max)
     div_db = cursor.fetchall()[0][0]
 
     if not div_db:
-        div_db = 0
+        div_db = zero_day_ns
 
-    for i in range(0, div["total"] - div_db):
-        details = div['rows'][i]
-        sql = "INSERT INTO crypto.dividends VALUES (%s, %s,%s, %s, %s, %s)"
-        cursor.execute(sql, list(details.values()))
+    sql = "INSERT INTO crypto.dividends VALUES (" + (values-1)*"%s,"+" %s)"
+    more = " "
+    q = now_ns
+    div = {'total': 500}
+
+    while div['total'] == 500:
+        print("\nGETTING" + more + "DIVIDENDS...")
+        div = await client.get_asset_dividend_history(limit=500, startTime=div_db + 1, endTime=q)
+
+        [cursor.execute(sql, list((div['rows'][i]).values())) for i in tqdm(range(0, div["total"]))]
+
+        if div["total"] == 500:
+            more = " MORE "
+            q = div['rows'][499]['divTime'] - 1
 
     my_db.commit()
-    print("\n##############################################\n")
+    print(sep)
 
 
+"""
 async def get_fiat_deposits():
     deposits = await binance_fiat_deposits()
 
@@ -138,31 +150,33 @@ async def get_fiat_deposits():
 
         my_db.commit()
 
-    print("\n##############################################\n")
+    print(sep)
+"""
 
 
-async def get_fiat_withdraws():
-    withdraws = await binance_fiat_withdraws()
-    print("\nGETTING FIAT WITHDRAWS...")
-    sql_max = "SELECT count(orderNo) FROM crypto.fiatWithdraws"
+async def get_fiat_dep_withdraws(is_withdraw=0, nvalues=9):
+    orders = await binance_fiat_deposits(is_withdraw=is_withdraw)
+    message1 = "fiatWithdraws" if is_withdraw else "fiatDeposits"
+    print("\nGETTING FIAT " + (message1[4:]).upper() + "...")
+    sql_max = "SELECT count(orderNo) FROM crypto." + message1
     cursor.execute(sql_max)
     wd_db = cursor.fetchall()
 
-    if withdraws is None:
-        print("NO FIAT WITHDRAWS")
+    if orders is None:
+        print("NO FIAT " + (message1[4:]).upper())
     else:
         if wd_db is None:
             to_final = 0
         else:
-            to_final = withdraws["total"] - wd_db[0][0]
-        print("YOU HAVE GOT " + str(to_final) + " NEW WITHDRAWS")
-        for i in range(0, to_final):
-            sql = "INSERT INTO crypto.fiatWithdraws VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            cursor.execute(sql, list((withdraws["data"][i]).values()))
+            to_final = orders["total"] - wd_db[0][0]
+        print("YOU HAVE GOT " + str(to_final) + " NEW " + (message1[4:]).upper())
+        for i in tqdm(range(0, to_final)):
+            sql = "INSERT INTO crypto." + message1 + " VALUES (" + (nvalues-1)*"%s, " + "%s)"
+            cursor.execute(sql, list((orders["data"][i]).values()))
 
         my_db.commit()
 
-    print("\n##############################################\n")
+    print(sep)
 
 
 async def get_fiat_orders():
@@ -178,7 +192,7 @@ async def get_fiat_orders():
     else:
         for loop_i, typeOrder in enumerate(["sell", "buy"]):
 
-            if not ord_db or len(ord_db) < loop_i+1:
+            if not ord_db or len(ord_db) < loop_i + 1:
                 from_w = 0
             else:
                 from_w = ord_db[loop_i][0]
@@ -193,4 +207,4 @@ async def get_fiat_orders():
 
         my_db.commit()
 
-    print("\n##############################################\n")
+    print(sep)
