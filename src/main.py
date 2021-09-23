@@ -2,7 +2,7 @@ import asyncio
 from binance import AsyncClient
 
 from candles import get_candles
-from secrets import api_secret, api_key
+from utilitiesAndSecrets import api_secret, api_key
 from assets import get_assets_snap
 import tradesAndOrders as tao
 

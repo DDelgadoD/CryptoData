@@ -1,4 +1,6 @@
 from time import altzone, time
+import mysql.connector
+
 # Secrets
 # API Key from Binance
 api_key = ""
@@ -28,3 +30,20 @@ utc_zero_ns = utc_zero * 1000
 now = int(time())
 now_ns = now * 1000
 sep = "\n##############################################\n"
+
+# Database connection
+
+
+def connect():
+    return mysql.connector.connect(
+        host=host,
+        user=user,
+        password=password
+    )
+
+
+# Connect to Local Database
+my_db = connect()
+
+# Creating a cursor to make the sql callings
+cursor = my_db.cursor()

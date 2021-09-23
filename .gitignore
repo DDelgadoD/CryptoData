@@ -51,7 +51,7 @@ Thumbs.db
 # Passwords and Keys
 secrets.py
 /venv/
-/src/secrets.py
+/src/utilitiesAndSecrets.py
 /.idea
 
 

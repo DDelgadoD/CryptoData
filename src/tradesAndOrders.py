@@ -1,8 +1,7 @@
-from customAPI import binance_fiat_deposits, binance_fiat_orders
-from database import my_db, cursor
 from tqdm import tqdm
 
-from secrets import zero_day_ns, now_ns, sep
+from customAPI import binance_fiat_deposits, binance_fiat_orders
+from utilitiesAndSecrets import zero_day_ns, now_ns, sep, my_db, cursor
 
 
 def get_pairs():
@@ -158,6 +157,7 @@ async def get_fiat_dep_withdraws(is_withdraw=0, nvalues=9):
     orders = await binance_fiat_deposits(is_withdraw=is_withdraw)
     message1 = "fiatWithdraws" if is_withdraw else "fiatDeposits"
     print("\nGETTING FIAT " + (message1[4:]).upper() + "...")
+
     sql_max = "SELECT count(orderNo) FROM crypto." + message1
     cursor.execute(sql_max)
     wd_db = cursor.fetchall()

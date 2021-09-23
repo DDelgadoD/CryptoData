@@ -1,8 +1,7 @@
 import gc
 from time import time
 
-from database import my_db, cursor
-from secrets import month_timestamp_ns, zero_day_ns, sep
+from utilitiesAndSecrets import month_timestamp_ns, zero_day_ns, sep, my_db, cursor
 
 
 def initial_time(pair):

@@ -1,9 +1,7 @@
 import time
 from datetime import datetime
 
-
-from database import my_db, cursor
-from secrets import month_timestamp_ns, zero_day_s, day_timestamp_s
+from utilitiesAndSecrets import month_timestamp_ns, zero_day_s, day_timestamp_s, my_db, cursor
 
 
 def assets_snap_db(line):
