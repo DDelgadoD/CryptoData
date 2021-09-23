@@ -125,34 +125,6 @@ async def get_dividends(client, values=6):
     print(sep)
 
 
-"""
-async def get_fiat_deposits():
-    deposits = await binance_fiat_deposits()
-
-    print("\nGETTING FIAT DEPOSITS...")
-    sql_max = "SELECT count(orderNo) FROM crypto.fiatDeposits"
-    cursor.execute(sql_max)
-    dep_db = cursor.fetchall()
-    if deposits is None:
-        print("NO FIAT DEPOSITS")
-    else:
-        if not dep_db:
-            from_d = 0
-        else:
-            from_d = dep_db[0][0]
-
-        to_final = deposits["total"] - from_d
-        print("YOU HAVE GOT " + str(to_final) + " NEW DEPOSITS")
-        for i in range(from_d, to_final):
-            sql = "INSERT INTO crypto.fiatDeposits VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-            cursor.execute(sql, list((deposits["data"][i]).values()))
-
-        my_db.commit()
-
-    print(sep)
-"""
-
-
 async def get_fiat_dep_withdraws(is_withdraw=0, nvalues=9):
     orders = await binance_fiat_deposits(is_withdraw=is_withdraw)
     message1 = "fiatWithdraws" if is_withdraw else "fiatDeposits"
