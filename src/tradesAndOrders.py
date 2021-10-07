@@ -41,14 +41,10 @@ async def get_trades(client):
 
             trades = await client.get_my_trades(symbol=pair, fromId=get_max_id("trades", pair))
 
-            for trade in trades:
+            for trade in tqdm(trades):
                 if trade:
                     print("GETTING TRADES for " + pair)
-                    val = (trade['symbol'], trade['id'], trade['orderId'], trade['orderListId'], trade['price'],
-                           trade['qty'], trade['quoteQty'], trade['commission'], trade['commissionAsset'],
-                           trade['time'], trade['isBuyer'], trade['isMaker'], trade['isBestMatch'])
-
-                    cursor.execute(sql, val)
+                    cursor.execute(sql, list(trade.values()))
 
     my_db.commit()
     print(sep)

@@ -22,10 +22,12 @@ async def get_assets_snap(client, op_type='SPOT'):
 
     sql = "SELECT MAX(date) FROM crypto.assets"
     cursor.execute(sql)
-    start_time = int(datetime.timestamp(cursor.fetchall()[0][0])) + day_timestamp_s
-
+    start_time = cursor.fetchall()[0][0]
+    print(" LOADING DAILY SNAPSHOTS From: " + start_time)
     if start_time is None:
         start_time = zero_day_s
+    else:
+        start_time = int(datetime.timestamp(start_time)) + day_timestamp_s
 
     # Call the function get_account_snapshot with the start time in start_time, the end time is current time in
     # milliseconds and month_timestamp is a 30 days period in milliseconds because the function get_account_snapshot

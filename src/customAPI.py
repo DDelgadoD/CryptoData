@@ -6,12 +6,6 @@ from urllib.parse import urljoin, urlencode
 import requests
 import utilitiesAndSecrets as us
 
-BASE_URL = 'https://api.binance.com'
-
-headers = {
-    'X-MBX-APIKEY': us.api_key
-}
-
 
 class BinanceException(Exception):
     def __init__(self, status_code, data_a):
@@ -33,8 +27,8 @@ async def base_get(path, params):
     params['signature'] = hmac.new(us.api_secret.encode('utf-8'), query_string.encode('utf-8'),
                                    hashlib.sha256).hexdigest()
 
-    url = urljoin(BASE_URL, path)
-    r = requests.get(url, headers=headers, params=params)
+    url = urljoin(us.BASE_URL, path)
+    r = requests.get(url, headers=us.headers, params=params)
     if r.status_code == 200:
         data = r.json()
     else:
@@ -44,18 +38,18 @@ async def base_get(path, params):
 
 
 async def binance_fiat_deposits(is_withdraw=0, begin_time=us.zero_day_s * 1000, timestamp=int(time.time() * 1000)):
-    return await base_get(path='/sapi/v1/fiat/orders', params={'transactionType': is_withdraw, 'beginTime': begin_time,
-                                                               'timestamp': timestamp, 'rows': 500,
+    return await base_get(path=us.fiat_orders, params={'transactionType': is_withdraw, 'beginTime': begin_time,
+                                                               'timestamp': int(time.time() * 1000), 'rows': 500,
                                                                "recvWindow": 60000})
 
 
 async def binance_fiat_orders(begin_time=us.zero_day_s * 1000, timestamp=int(time.time() * 1000)):
 
-    data_j = {"sell": await base_get(path='/sapi/v1/fiat/payments',
+    data_j = {"sell": await base_get(path=us.fiat_payments,
                                      params={'transactionType': 0, 'beginTime': begin_time,
-                                             'timestamp': timestamp, "recvWindow": 60000}),
-              "buy": await base_get(path='/sapi/v1/fiat/payments',
+                                             'timestamp': int(time.time() * 1000), "recvWindow": 60000}),
+              "buy": await base_get(path=us.fiat_payments,
                                     params={'transactionType': 1, 'beginTime': begin_time,
-                                            'timestamp': timestamp, "recvWindow": 60000})}
+                                            'timestamp': int(time.time() * 1000), "recvWindow": 60000})}
 
     return data_j

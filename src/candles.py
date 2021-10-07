@@ -1,5 +1,7 @@
 import gc
 from time import time
+from tqdm import tqdm
+
 
 from utilitiesAndSecrets import month_timestamp_ns, zero_day_ns, sep, my_db, cursor
 
@@ -42,13 +44,10 @@ async def parallelize_candles(pair, now_db, client):
 
         sql = "INSERT INTO crypto.candles VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
-        val = []
+        for tick in tqdm(t):
+            val = [tick[0], tick[1], tick[2], tick[3], tick[4], tick[5], tick[6], pair, None, None, None, None, None]
+            cursor.execute(sql, val)
 
-        for tick in t:
-            val.append((tick[0], tick[1], tick[2], tick[3], tick[4], tick[5], tick[6], pair, None, None, None,
-                        None, None))
-
-        cursor.executemany(sql, val)
         my_db.commit()
         gc.collect()
 
@@ -59,7 +58,6 @@ async def get_candles(client):
     pairs = sorted([price['symbol'] for price in await client.get_all_tickers()])
     now_db = int(time()) * 1000
 
-    [await parallelize_candles(pair, now_db, client) for pair in pairs if ("EUR" in pair or "USDT" in pair or
-                                                                           pair == "BETHETH") and pair in pairs_db]
+    [await parallelize_candles(pair, now_db, client) for pair in pairs if ("EUR" in pair or "USDT" in pair or pair == "BETHETH") and pair in pairs_db]
 
     print(sep)
