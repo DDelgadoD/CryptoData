@@ -23,7 +23,7 @@ async def get_assets_snap(client, op_type='SPOT'):
     sql = "SELECT MAX(date) FROM crypto.assets"
     cursor.execute(sql)
     start_time = cursor.fetchall()[0][0]
-    print(" LOADING DAILY SNAPSHOTS From: " + start_time)
+    print(" LOADING DAILY SNAPSHOTS From: " + str(start_time))
     if start_time is None:
         start_time = zero_day_s
     else:
