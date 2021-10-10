@@ -41,7 +41,7 @@ async def get_trades(client):
 
             trades = await client.get_my_trades(symbol=pair, fromId=get_max_id("trades", pair))
 
-            for trade in tqdm(trades):
+            for trade in trades:
                 if trade:
                     print("GETTING TRADES for " + pair)
                     cursor.execute(sql, list(trade.values()))
@@ -50,27 +50,24 @@ async def get_trades(client):
     print(sep)
 
 
-async def get_orders(client):
+async def get_orders(client, is_order=1):
+    message = "orders" if is_order else "trades"
+    values = 18 if is_order else 13
+
     pairs = get_pairs()
     binance_pairs = await get_binance_pairs(client)
-    sql_or = "INSERT INTO crypto.orders VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    sql = "INSERT INTO crypto."+ message + " VALUES (" + (values-1)*"%s,"+" %s)"
     print("GETTING ORDERS...")
     for pair in pairs.keys():
 
         if pair in binance_pairs:
+            ops = await client.get_all_orders(symbol=pair, orderId=get_max_id(message, pair)) if is_order else \
+                await client.get_my_trades(symbol=pair, fromId=get_max_id(message, pair))
 
-            orders = await client.get_all_orders(symbol=pair, orderId=get_max_id("orders", pair))
-
-            for order in orders:
-                if order:
-                    print("GETTING ORDERS for " + pair)
-                    val_or = (order['symbol'], order['orderId'], order['orderListId'], order['clientOrderId'],
-                              order['price'], order['origQty'], order['executedQty'], order['cummulativeQuoteQty'],
-                              order['status'], order['timeInForce'], order['type'], order['side'], order['stopPrice'],
-                              order['icebergQty'], order['time'], order['updateTime'], order['isWorking'],
-                              order['origQuoteOrderQty'])
-
-                    cursor.execute(sql_or, val_or)
+            for op in ops:
+                if op:
+                    print("GETTING "+ message.upper() +" for " + pair)
+                    cursor.execute(sql, list(op.values()))
 
     my_db.commit()
     print(sep)
