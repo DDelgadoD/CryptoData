@@ -174,6 +174,7 @@ async def get_dep_with(client, is_deposit=1):
         for op in div:
             sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s, " + "%s)"
             if op:
+                print(list(op.values()))
                 cursor.execute(sql, list(op.values()))
 
     print(sep)
