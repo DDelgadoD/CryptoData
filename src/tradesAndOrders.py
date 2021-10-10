@@ -29,35 +29,14 @@ def get_max_id(where, pair):
     return max_id + 1 if max_id else 0
 
 
-async def get_trades(client):
-    pairs = get_pairs()
-    binance_pairs = await get_binance_pairs(client)
-
-    sql = "INSERT INTO crypto.trades VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    print("GETTING TRADES...")
-    for pair in pairs.keys():
-
-        if pair in binance_pairs:
-
-            trades = await client.get_my_trades(symbol=pair, fromId=get_max_id("trades", pair))
-
-            for trade in trades:
-                if trade:
-                    print("GETTING TRADES for " + pair)
-                    cursor.execute(sql, list(trade.values()))
-
-    my_db.commit()
-    print(sep)
-
-
-async def get_orders(client, is_order=1):
+async def get_ord_and_trad(client, is_order=1):
     message = "orders" if is_order else "trades"
     values = 18 if is_order else 13
 
     pairs = get_pairs()
     binance_pairs = await get_binance_pairs(client)
-    sql = "INSERT INTO crypto."+ message + " VALUES (" + (values-1)*"%s,"+" %s)"
-    print("GETTING ORDERS...")
+    sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s,"+" %s)"
+    print("GETTING " + message.upper() + "...")
     for pair in pairs.keys():
 
         if pair in binance_pairs:
