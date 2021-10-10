@@ -1,7 +1,7 @@
 from tqdm import tqdm
 
 from customAPI import binance_fiat_deposits, binance_fiat_orders
-from utilitiesAndSecrets import zero_day_ns, now_ns, sep, my_db, cursor
+from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor
 
 
 def get_pairs():
@@ -45,7 +45,7 @@ async def get_ord_and_trad(client, is_order=1):
 
             for op in ops:
                 if op:
-                    print("GETTING "+ message.upper() +" for " + pair)
+                    print("GETTING " + message.upper() + " for " + pair)
                     cursor.execute(sql, list(op.values()))
 
     my_db.commit()
@@ -150,5 +150,29 @@ async def get_fiat_orders():
                 cursor.execute(sql, val)
 
         my_db.commit()
+
+    print(sep)
+
+
+async def get_dep_with(client, is_deposit=1):
+    message = "orders" if is_deposit else "trades"
+    values = 11
+
+    sql_max = "SELECT max(divTime) FROM crypto." + message
+    cursor.execute(sql_max)
+    from_date = cursor.fetchall()[0][0]
+
+    if not from_date:
+        from_date = zero_day_ns
+
+    print("\nGETTING DEPOSITS...")
+    for start_date in range(from_date + 1000, now_ns, 90 * day_timestamp_ns):
+        final = (start_date + 90 * day_timestamp_ns)
+        div = await client.get_deposit_history(startTime=start_date, endTime=final) if is_deposit else \
+            await client.get_withdraw_history(startTime=start_date, endTime=final)
+        for op in div:
+            sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s, " + "%s)"
+            if op:
+                cursor.execute(sql, list(op.values()))
 
     print(sep)

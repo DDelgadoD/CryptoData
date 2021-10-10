@@ -17,6 +17,8 @@ async def main():
     await tao.get_ord_and_trad(client, 0)
     await tao.get_ord_and_trad(client, 1)
     await tao.get_fiat_orders()
+    await tao.get_dep_with(client, 1)
+    await tao.get_dep_with(client, 0)
     await tao.get_fiat_dep_withdraws(is_withdraw=1)
     await tao.get_fiat_dep_withdraws(is_withdraw=0)
     await client.close_connection()
