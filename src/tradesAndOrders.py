@@ -166,7 +166,7 @@ async def get_dep_with(client, is_deposit=1):
     if not from_date:
         from_date = zero_day_ns
 
-    print("\nGETTING DEPOSITS...")
+    print("\nGETTING " + message.upper() + "...")
     for start_date in range(from_date + 1000, now_ns, 90 * day_timestamp_ns):
         final = (start_date + 90 * day_timestamp_ns)
         div = await client.get_deposit_history(startTime=start_date, endTime=final) if is_deposit else \
