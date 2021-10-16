@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from tqdm import tqdm
 
 from customAPI import binance_fiat_deposits, binance_fiat_orders
@@ -156,13 +158,16 @@ async def get_fiat_orders():
 
 async def get_dep_with(client, is_deposit=1):
     message = "deposits" if is_deposit else "withdraws"
-    values = 11 if is_deposit else 11
+    values = 11
     tim = "insertTime" if is_deposit else "applyTime"
 
     sql_max = "SELECT max(" + tim + ") FROM crypto." + message
     cursor.execute(sql_max)
     from_date = cursor.fetchall()[0][0]
 
+    if from_date and tim == "applyTime":
+        from_date = int(datetime.timestamp(from_date)) + 1
+        
     if not from_date:
         from_date = zero_day_ns
 
