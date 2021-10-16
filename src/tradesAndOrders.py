@@ -166,7 +166,7 @@ async def get_dep_with(client, is_deposit=1):
     from_date = cursor.fetchall()[0][0]
 
     if from_date and tim == "applyTime":
-        from_date = int(datetime.datetime(from_date).timestamp()) + 1
+        from_date = int(from_date.timestamp()) + 1
         
     if not from_date:
         from_date = zero_day_ns
