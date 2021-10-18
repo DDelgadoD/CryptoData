@@ -1,7 +1,7 @@
 import gc
 from time import time
-from tqdm import tqdm
 
+from tqdm import tqdm
 
 from utilitiesAndSecrets import month_timestamp_ns, zero_day_ns, sep, my_db, cursor
 
