@@ -1,0 +1,6 @@
+asyncio~=3.4.3
+binance~=0.3
+tqdm~=4.62.3
+requests~=2.24.0
+mysql-connector-python~=8.0.21
+setuptools~=41.2.0
