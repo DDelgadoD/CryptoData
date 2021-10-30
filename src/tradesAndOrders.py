@@ -54,6 +54,7 @@ async def get_ord_and_trad(client, is_order=1):
 
 async def get_dust(client):
     dust = await client.get_dust_log()
+    print(dust)
     print("\nGETTING DUST EXCHANGE...")
     sql_max = "SELECT count(transId) FROM crypto.dust"
     cursor.execute(sql_max)
@@ -61,7 +62,7 @@ async def get_dust(client):
     if not dust_db:
         dust_db = 0
 
-    for i in range(dust["total"]-dust_db, dust["total"]):
+    for i in range(dust_db, dust["total"]):
         details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][0]
         sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
         cursor.execute(sql, list(details.values()))
