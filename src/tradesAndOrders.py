@@ -54,7 +54,6 @@ async def get_ord_and_trad(client, is_order=1):
 
 async def get_dust(client):
     dust = await client.get_dust_log()
-    print(dust)
     print("\nGETTING DUST EXCHANGE...")
     sql_max = "SELECT max(operateTime) FROM crypto.dust"
     cursor.execute(sql_max)
@@ -67,6 +66,7 @@ async def get_dust(client):
             j = 0
             while dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]:
                 details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]
+                print(details)
                 sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
                 cursor.execute(sql, list(details.values()))
                 j = j + 1
