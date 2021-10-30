@@ -56,7 +56,7 @@ async def get_dust(client):
     dust = await client.get_dust_log()
     print(dust)
     print("\nGETTING DUST EXCHANGE...")
-    sql_max = "SELECT max(transId) FROM crypto.dust"
+    sql_max = "SELECT max(operateTime) FROM crypto.dust"
     cursor.execute(sql_max)
     dust_db = cursor.fetchall()[0][0]
     if not dust_db:
