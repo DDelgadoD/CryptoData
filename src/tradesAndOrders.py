@@ -59,7 +59,7 @@ async def get_dust(client):
     print("\nGETTING DUST EXCHANGE...")
     sql_max = "SELECT count(transId) FROM crypto.dust"
     cursor.execute(sql_max)
-    dust_db = cursor.fetchall()[0][0]
+    dust_db = cursor.fetchall()[0][0] + 1
     if not dust_db:
         dust_db = 0
 
