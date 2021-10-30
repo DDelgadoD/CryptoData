@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from tqdm import tqdm
 
 from customAPI import binance_fiat_deposits, binance_fiat_orders

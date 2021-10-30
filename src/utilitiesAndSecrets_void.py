@@ -16,6 +16,11 @@ local_host = ''
 local_user = ''
 local_password = ""
 
+# LOG
+log_path = ""
+m_log = {"start": 'Started Crypto Database process',
+         "end": 'Ended Crypto Database process'}
+
 # Utilities
 zero_day_s = 1619301600
 zero_day_ns = zero_day_s * 1000

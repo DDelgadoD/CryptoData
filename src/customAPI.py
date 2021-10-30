@@ -4,6 +4,7 @@ import time
 from urllib.parse import urljoin, urlencode
 
 import requests
+
 import utilitiesAndSecrets as us
 
 
@@ -37,14 +38,13 @@ async def base_get(path, params):
     return data
 
 
-async def binance_fiat_deposits(is_withdraw=0, begin_time=us.zero_day_s * 1000, timestamp=int(time.time() * 1000)):
+async def binance_fiat_deposits(is_withdraw=0, begin_time=us.zero_day_s * 1000):
     return await base_get(path=us.fiat_orders, params={'transactionType': is_withdraw, 'beginTime': begin_time,
-                                                               'timestamp': int(time.time() * 1000), 'rows': 500,
-                                                               "recvWindow": 60000})
+                                                       'timestamp': int(time.time() * 1000), 'rows': 500,
+                                                       "recvWindow": 60000})
 
 
-async def binance_fiat_orders(begin_time=us.zero_day_s * 1000, timestamp=int(time.time() * 1000)):
-
+async def binance_fiat_orders(begin_time=us.zero_day_s * 1000):
     data_j = {"sell": await base_get(path=us.fiat_payments,
                                      params={'transactionType': 0, 'beginTime': begin_time,
                                              'timestamp': int(time.time() * 1000), "recvWindow": 60000}),
