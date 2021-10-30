@@ -56,16 +56,17 @@ async def get_dust(client):
     dust = await client.get_dust_log()
     print(dust)
     print("\nGETTING DUST EXCHANGE...")
-    sql_max = "SELECT count(transId) FROM crypto.dust"
+    sql_max = "SELECT max(transId) FROM crypto.dust"
     cursor.execute(sql_max)
     dust_db = cursor.fetchall()[0][0]
     if not dust_db:
         dust_db = 0
 
-    for i in range(dust_db, dust["total"]):
-        details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][0]
-        sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
-        cursor.execute(sql, list(details.values()))
+    for i in range(dust["total"]):
+        if dust_db > dust['userAssetDribblets'][i]['operateTime']:
+            details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][0]
+            sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
+            cursor.execute(sql, list(details.values()))
 
     my_db.commit()
     print(sep)
