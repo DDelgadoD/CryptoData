@@ -63,7 +63,7 @@ async def get_dust(client):
         dust_db = 0
 
     for i in range(dust["total"]):
-        if dust_db > dust['userAssetDribblets'][i]['operateTime']:
+        if dust_db < dust['userAssetDribblets'][i]['operateTime']:
             details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][0]
             sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
             cursor.execute(sql, list(details.values()))
