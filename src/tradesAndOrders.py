@@ -67,7 +67,6 @@ async def get_dust(client):
             try:
                 while dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]:
                     details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]
-                    print(details)
                     sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
                     cursor.execute(sql, list(details.values()))
                     j = j + 1
