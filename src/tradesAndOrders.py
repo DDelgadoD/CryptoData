@@ -64,13 +64,15 @@ async def get_dust(client):
     for i in range(dust["total"]):
         if dust_db < dust['userAssetDribblets'][i]['operateTime']:
             j = 0
-            while dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]:
-                details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]
-                print(details)
-                sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
-                cursor.execute(sql, list(details.values()))
-                j = j + 1
-
+            try:
+                while dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]:
+                    details = dust['userAssetDribblets'][i]['userAssetDribbletDetails'][j]
+                    print(details)
+                    sql = "INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)"
+                    cursor.execute(sql, list(details.values()))
+                    j = j + 1
+            except IndexError:
+                None
     my_db.commit()
     print(sep)
 
