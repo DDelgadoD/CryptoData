@@ -162,7 +162,7 @@ async def get_fiat_orders():
 
 async def get_dep_with(client, is_deposit=1):
     message = "deposits" if is_deposit else "withdraws"
-    values = 11
+    values = 12
     tim = "insertTime" if is_deposit else "applyTime"
 
     sql_max = "SELECT max(" + tim + ") FROM crypto." + message
@@ -180,6 +180,7 @@ async def get_dep_with(client, is_deposit=1):
         final = (start_date + 90 * day_timestamp_ns)
         div = await client.get_deposit_history(startTime=start_date, endTime=final) if is_deposit else \
             await client.get_withdraw_history(startTime=start_date, endTime=final)
+        print(div)
         for op in div:
             sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s, " + "%s)"
             if op:
