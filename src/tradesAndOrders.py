@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from customAPI import binance_fiat_deposits, binance_fiat_orders
+from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends
 from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor
 
 
@@ -77,6 +77,8 @@ async def get_dust(client):
 
 
 async def get_dividends(client, values=6):
+    # We know for a fact that there are older transactions that can be fetched from the
+    # /lending/union/interestHistory endpoint.
     sql_max = "SELECT max(divTime) FROM crypto.dividends"
     cursor.execute(sql_max)
     div_db = cursor.fetchall()[0][0]
@@ -100,6 +102,9 @@ async def get_dividends(client, values=6):
             q = div['rows'][499]['divTime'] - 1
 
     my_db.commit()
+
+    a = await binance_old_dividends()
+    print(a)
     print(sep)
 
 
