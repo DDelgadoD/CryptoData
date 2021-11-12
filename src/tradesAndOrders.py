@@ -6,7 +6,7 @@ from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_d
 
 
 def get_ymd(timestamp):
-    return datetime.fromtimestamp(timestamp)
+    return datetime.fromtimestamp(timestamp/1000)
 
 
 def get_pairs():
