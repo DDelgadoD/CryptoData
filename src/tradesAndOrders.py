@@ -107,9 +107,9 @@ async def get_dividends(client, values=6):
     cursor.execute(sql_min)
     div_db = cursor.fetchall()[0][0]
 
-    a = await binance_old_dividends(lending_type='DAILY', endtime=div_db)
-    b = await binance_old_dividends(lending_type='ACTIVITY', endtime=div_db)
-    c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED', endtime=div_db)
+    a = await binance_old_dividends(lending_type='DAILY', end_time=div_db)
+    b = await binance_old_dividends(lending_type='ACTIVITY', end_time=div_db)
+    c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED', end_time=div_db)
     print("A: ", a)
     print("B: ", b)
     print("C: ", c)
