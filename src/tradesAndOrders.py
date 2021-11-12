@@ -103,8 +103,12 @@ async def get_dividends(client, values=6):
 
     my_db.commit()
 
-    a = await binance_old_dividends()
-    print(a)
+    a = await binance_old_dividends(lending_type='DAILY')
+    b = await binance_old_dividends(lending_type='ACTIVITY')
+    c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED')
+    print("A: ", a)
+    print("B: ", b)
+    print("C: ", c)
     print(sep)
 
 
