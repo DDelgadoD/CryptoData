@@ -1,7 +1,12 @@
 from tqdm import tqdm
+from datetime import datetime
 
 from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends
 from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor
+
+
+def get_ymd(timestamp):
+    return datetime.fromtimestamp(timestamp)
 
 
 def get_pairs():
@@ -106,7 +111,8 @@ async def get_dividends(client, values=6):
     sql_min = "SELECT min(divTime) FROM crypto.dividends where enInfo != 'BNB Vault' or asset= 'BNB'"
     cursor.execute(sql_min)
     div_db = cursor.fetchall()[0][0]
-    print(div_db)
+    print(get_ymd(div_db))
+
     a = await binance_old_dividends(lending_type='DAILY')
     b = await binance_old_dividends(lending_type='ACTIVITY', end_time=div_db)
     c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED', end_time=div_db)
