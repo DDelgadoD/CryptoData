@@ -6,7 +6,7 @@ from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_d
 
 
 def get_ymd(timestamp):
-    return datetime.fromtimestamp(timestamp/1000)
+    return datetime.strptime((datetime.fromtimestamp(timestamp/1000)).strftime("%d/%m/%Y"), "%d/%m/%Y")
 
 
 def get_pairs():
@@ -119,6 +119,7 @@ async def get_dividends(client, values=6):
     print("A: ", a)
     print("B: ", b)
     print("C: ", c)
+
     print(sep)
 
 
