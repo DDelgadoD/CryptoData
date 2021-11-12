@@ -103,13 +103,13 @@ async def get_dividends(client, values=6):
 
     my_db.commit()
     # if div_db == zero_day_ns:
-    sql_min = "SELECT min(divTime) FROM crypto.dividends"
+    sql_min = "SELECT min(divTime) FROM crypto.dividends where enInfo != 'BNB Vault' or asset= 'BNB'"
     cursor.execute(sql_min)
     div_db = cursor.fetchall()[0][0]
 
-    a = await binance_old_dividends(lending_type='DAILY')
-    b = await binance_old_dividends(lending_type='ACTIVITY')
-    c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED')
+    a = await binance_old_dividends(lending_type='DAILY', end_time=div_db)
+    b = await binance_old_dividends(lending_type='ACTIVITY', end_time=div_db)
+    c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED', end_time=div_db)
     print("A: ", a)
     print("B: ", b)
     print("C: ", c)
