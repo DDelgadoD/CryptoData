@@ -55,8 +55,8 @@ async def binance_fiat_orders(begin_time=us.zero_day_s * 1000):
     return data_j
 
 
-async def binance_old_dividends(begin_time=us.zero_day_ns, ending_time=us.zero_day_ns + us.month_timestamp_ns,
+async def binance_old_dividends(start_time=us.zero_day_ns, end_time=us.zero_day_ns + us.month_timestamp_ns,
                                 lending_type='DAILY'):
     return await base_get(path=us.old_dividends, params={'lendingType': lending_type, 'transactionType': 0, 'size': 100,
-                                                         'beginTime': begin_time, 'endingTime': ending_time,
+                                                         'startTime': start_time, 'endTime': end_time,
                                                          'timestamp': int(time.time() * 1000)})
