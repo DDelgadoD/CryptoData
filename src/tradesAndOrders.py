@@ -118,7 +118,7 @@ async def get_dividends(client, values=6):
             a = await binance_old_dividends(lending_type=lending_type, end_time=div_db-1)
 
             for op in tqdm(a):
-                b = {'id': "000000", 'tranId': int("0000" + str(op['time'] * op["interest"])), 'asset': op['asset'],
+                b = {'id': "000000", 'tranId':op['time'] * op["interest"], 'asset': op['asset'],
                      'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
                 cursor.execute(sql, b)
 
