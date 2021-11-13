@@ -108,6 +108,8 @@ async def get_dividends(client, values=6):
     div_db = get_ts(get_dt(cursor.fetchall()[0][0]), day=1)
     print(div_db)
 
+    sql = "INSERT INTO crypto.dividends VALUES (" + (values - 1) * "%s," + " %s)"
+
     for lending_type in ['DAILY', 'ACTIVITY', 'CUSTOMIZED_FIXED']:
         a = list(range(100))
 
