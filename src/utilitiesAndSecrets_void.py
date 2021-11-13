@@ -1,27 +1,24 @@
 from time import altzone, time
 import mysql.connector
+from datetime import datetime
 
 # Secrets
-# API Key from Binance
 api_key = ""
 api_secret = ""
 
-# Production SQL Server
-host = ""
-user = ""
-password = ""
-
-# Local/Test SQL Server
-local_host = ''
-local_user = ''
-local_password = ""
-
 # LOG
-log_path = ""
+log_path = "crypto.log"
 m_log = {"start": 'Started Crypto Database process',
          "end": 'Ended Crypto Database process'}
 
-# Utilities
+# Custom api frontends
+BASE_URL = 'https://api.binance.com'
+fiat_orders = '/sapi/v1/fiat/orders'
+fiat_payments = '/sapi/v1/fiat/payments'
+old_dividends = '/sapi/v1/lending/union/interestHistory'
+headers = {'X-MBX-APIKEY': api_key}
+
+# date and time
 zero_day_s = 1619301600
 zero_day_ns = zero_day_s * 1000
 day_timestamp_s = 86400
@@ -34,9 +31,31 @@ utc_zero = -altzone
 utc_zero_ns = utc_zero * 1000
 now = int(time())
 now_ns = now * 1000
+
+
+def get_dt(ts, sec=0, day=0):
+    srt = "%d/%m/%Y " if day == 1 else "%d/%m/%Y %H:%M:%S"
+    ts = ts if sec == 1 else int(ts / 1000)
+    dt = datetime.strptime((datetime.fromtimestamp(ts)).strftime(srt), srt)
+    return dt
+
+
+def get_ts(dt, sec=0, day=0):
+    dt = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S") if type(dt) is str else dt
+    ts = datetime.timestamp(dt) if sec == 1 else int(datetime.timestamp(dt) * 1000)
+    return ts
+
 sep = "\n##############################################\n"
 
 # Database connection
+
+host = ""
+user = ""
+password = ""
+
+local_host = ''
+local_user = ''
+local_password = ""
 
 
 def connect():
