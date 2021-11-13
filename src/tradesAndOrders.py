@@ -108,7 +108,7 @@ async def get_dividends(client, values=6):
     div_db = get_ts(get_dt(cursor.fetchall()[0][0]), day=1)
     print(div_db)
 
-    a = await binance_old_dividends(lending_type='DAILY')
+    a = await binance_old_dividends(lending_type='DAILY',end_time=div_db)
     b = await binance_old_dividends(lending_type='ACTIVITY', end_time=div_db)
     c = await binance_old_dividends(lending_type='CUSTOMIZED_FIXED', end_time=div_db)
     print("A: ", a)
