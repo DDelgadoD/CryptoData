@@ -119,7 +119,7 @@ async def get_dividends(client, values=6):
 
             for op in tqdm(a):
                 print(op)
-                b = {'id': "000000", 'tranId': int(int(a['time'])*float(a["interest"])), 'asset': op['asset'], 'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
+                b = [{'id': "000000", 'tranId': int(int(a['time'])*float(a["interest"])), 'asset': op['asset'], 'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}]
                 cursor.execute(sql, b)
 
             if len(a) == 100:
