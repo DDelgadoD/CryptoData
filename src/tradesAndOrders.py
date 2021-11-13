@@ -113,21 +113,16 @@ async def get_dividends(client, values=6):
 
         while len(a) == 100:
             print("\nGETTING" + more + " OLD DIVIDENDS...")
-            a = await binance_old_dividends(lending_type=lending_type, end_time=div_db)
+            a = await binance_old_dividends(lending_type=lending_type, end_time=div_db-1)
 
-            b = []
-
-            for op in a:
-                b.append({'id': "000000", 'id': int("0000" + op['time'] * op["interest"]), 'asset': op['asset'],
-                          'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']})
-
-            print(b)
-
-            [cursor.execute(sql, b) for i in tqdm(range(0, len(a)))]
+            for op in tqdm(a):
+                b = {'id': "000000", 'tranId': int("0000" + op['time'] * op["interest"]), 'asset': op['asset'],
+                     'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
+                cursor.execute(sql, b)
 
             if len(a) == 100:
                 more = " MORE "
-                div_db = a[100]['time'] - 1
+                div_db = a[100]['time']
 
     print(sep)
 
