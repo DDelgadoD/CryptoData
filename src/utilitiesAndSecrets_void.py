@@ -16,6 +16,7 @@ BASE_URL = 'https://api.binance.com'
 fiat_orders = '/sapi/v1/fiat/orders'
 fiat_payments = '/sapi/v1/fiat/payments'
 old_dividends = '/sapi/v1/lending/union/interestHistory'
+swap = '/sapi/v1/bswap/swap'
 headers = {'X-MBX-APIKEY': api_key}
 
 # date and time

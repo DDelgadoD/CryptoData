@@ -60,3 +60,8 @@ async def binance_old_dividends(start_time=us.zero_day_ns, end_time=us.zero_day_
     return await base_get(path=us.old_dividends, params={'lendingType': lending_type, 'transactionType': 0, 'size': 100,
                                                          'startTime': start_time, 'endTime': end_time,
                                                          'timestamp': int(time.time() * 1000)})
+
+
+async def binance_swap():
+    return await base_get(path=us.swap, params={'timestamp': int(time.time() * 1000)})
+
