@@ -22,8 +22,8 @@ async def get_binance_pairs(client):
     return prices
 
 
-def get_max_id(where, pair):
-    sql_max = "SELECT MAX(orderId) FROM crypto." + where + " WHERE symbol=\"" + pair + "\""
+def get_max_id(where, pair, mod=""):
+    sql_max = "SELECT MAX(orderId) FROM crypto." + where + " WHERE symbol=\"" + pair + "\"" + mod
     cursor.execute(sql_max)
     max_id = cursor.fetchall()[0][0]
     return max_id + 1 if max_id else 0
@@ -118,7 +118,8 @@ async def get_dividends(client, values=6):
             a = await binance_old_dividends(lending_type=lending_type, end_time=div_db-1)
 
             for op in tqdm(a):
-                b = {'id': "000000", 'tranId': int(int(op['time'])*float(op["interest"])), 'asset': op['asset'], 'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
+                b = {'id': "000000", 'tranId': int(int(op['time'])*float(op["interest"])), 'asset': op['asset'],
+                     'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
                 cursor.execute(sql, list(b.values()))
 
             if len(a) == 100:
@@ -211,4 +212,36 @@ async def get_dep_with(client, is_deposit=1):
             if op:
                 cursor.execute(sql, list(op.values()))
         my_db.commit()
+    print(sep)
+
+
+async def get_margin(client):
+    message = "marginOrders"
+    values = 17
+
+    pairs = get_pairs()
+    binance_pairs = await get_binance_pairs(client)
+    sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s,"+" %s)"
+    print("GETTING " + message.upper() + "...")
+    for pair in pairs.keys():
+        if pair in binance_pairs:
+            ops = await client.get_all_margin_orders(symbol=pair, orderId=get_max_id(message, pair))
+
+            for op in ops:
+                if op:
+                    print("GETTING " + message.upper() + " for " + pair)
+                    cursor.execute(sql, list(op.values()))
+
+    info = await client.get_isolated_margin_account()
+    print(info)
+    for i in range(len(info['assets'])):
+        ops = await client.get_all_margin_orders(symbol=info['assets'][i]['symbol'], isIsolated='TRUE',
+                                                 orderId=get_max_id(message, info['assets'][i]['symbol'],
+                                                                    mod=" AND isIsolated=1"))
+        for op in ops:
+            if op:
+                print("GETTING ISOLATED" + message.upper() + " for " + info['assets'][i]['symbol'])
+                cursor.execute(sql, list(op.values()))
+
+    my_db.commit()
     print(sep)

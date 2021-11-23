@@ -23,10 +23,12 @@ async def main():
     await tao.get_dep_with(client, 0)
     await tao.get_fiat_dep_withdraws(is_withdraw=1)
     await tao.get_fiat_dep_withdraws(is_withdraw=0)
+    await tao.get_margin(client)
     await client.close_connection()
     logging.info(m_log["end"])
 
 if __name__ == "__main__":
-    logging.basicConfig(filename=log_path, filemode='a', format='%(asctime)s %(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+    logging.basicConfig(filename=log_path, filemode='a', format='%(asctime)s %(name)s - %(levelname)s - %(message)s',
+                        level=logging.INFO)
     loop = asyncio.get_event_loop()
     loop.run_until_complete(main())
