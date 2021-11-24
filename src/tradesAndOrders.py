@@ -106,7 +106,6 @@ async def get_dividends(client, values=6):
     sql_min = "SELECT min(divTime) FROM crypto.dividends where enInfo != 'BNB Vault' or asset= 'BNB'"
     cursor.execute(sql_min)
     div_db = get_ts(get_dt(cursor.fetchall()[0][0]), day=1)
-    print(div_db)
 
     sql = "INSERT INTO crypto.dividends VALUES (" + (values - 1) * "%s," + " %s)"
 
@@ -231,9 +230,18 @@ async def get_margin(client):
                 if op:
                     print("GETTING " + message.upper() + " for " + pair)
                     cursor.execute(sql, list(op.values()))
+    my_db.commit()
+    print(sep)
 
+
+async def get_iso_margin(client):
+    message = "marginOrders"
+    values = 17
+
+    sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s,"+" %s)"
+    print("GETTING " + message.upper() + "ISOLATED ...")
     info = await client.get_isolated_margin_account()
-    print(info)
+
     for i in range(len(info['assets'])):
         ops = await client.get_all_margin_orders(symbol=info['assets'][i]['symbol'], isIsolated='TRUE',
                                                  orderId=get_max_id(message, info['assets'][i]['symbol'],
