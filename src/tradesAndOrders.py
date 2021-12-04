@@ -50,6 +50,7 @@ async def get_ord_and_trad(client, is_order=1):
                     cursor.execute(sql, list(op.values()))
 
         if int((client.response.headers)['x-mbx-used-weight-1m']) > 1150:
+            print("a little pause....")
             sleep(15)
 
     my_db.commit()
