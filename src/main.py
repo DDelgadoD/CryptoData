@@ -25,10 +25,9 @@ async def main():
 
     await tao.get_dust(client)
     await tao.get_dep_with(client, 1)
-    print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_dep_with(client, 0)
-    print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_iso_margin(client)
+    print((client.response.headers)['x-mbx-used-weight-1m'])
     ## Custom
     await tao.get_fiat_orders()
     await tao.get_fiat_dep_withdraws(is_withdraw=1)
