@@ -29,7 +29,6 @@ async def main():
     await tao.get_fiat_orders()
     await tao.get_fiat_dep_withdraws(is_withdraw=1)
     await tao.get_fiat_dep_withdraws(is_withdraw=0)
-
     await tao.get_margin(client)
 
     await client.close_connection()
