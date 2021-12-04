@@ -1,4 +1,5 @@
 from tqdm import tqdm
+from time import time
 
 from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends, cross_pairs
 from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor, get_dt, get_ts
@@ -47,7 +48,8 @@ async def get_ord_and_trad(client, is_order=1):
                 if op:
                     print("GETTING " + message.upper() + " for " + pair)
                     cursor.execute(sql, list(op.values()))
-
+        if (client.response.headers)['x-mbx-used-weight-1m'] > 1150:
+            time.sleep(5)
     my_db.commit()
     print(sep)
 
