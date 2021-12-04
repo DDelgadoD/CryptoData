@@ -1,0 +1,235 @@
+<html>
+<head>
+<title>tradesAndOrders.py</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style type="text/css">
+.s0 { color: #cc7832;}
+.s1 { color: #a9b7c6;}
+.s2 { color: #6a8759;}
+.s3 { color: #6897bb;}
+.s4 { color: #808080;}
+</style>
+</head>
+<body bgcolor="#2b2b2b">
+<table CELLSPACING=0 CELLPADDING=5 COLS=1 WIDTH="100%" BGCOLOR="#606060" >
+<tr><td><center>
+<font face="Arial, Helvetica" color="#000000">
+tradesAndOrders.py</font>
+</center></td></tr></table>
+<pre><span class="s0">from </span><span class="s1">tqdm </span><span class="s0">import </span><span class="s1">tqdm</span>
+
+<span class="s0">from </span><span class="s1">customAPI </span><span class="s0">import </span><span class="s1">binance_fiat_deposits</span><span class="s0">, </span><span class="s1">binance_fiat_orders</span><span class="s0">, </span><span class="s1">binance_old_dividends</span>
+<span class="s0">from </span><span class="s1">utilitiesAndSecrets </span><span class="s0">import </span><span class="s1">zero_day_ns</span><span class="s0">, </span><span class="s1">now_ns</span><span class="s0">, </span><span class="s1">day_timestamp_ns</span><span class="s0">, </span><span class="s1">sep</span><span class="s0">, </span><span class="s1">my_db</span><span class="s0">, </span><span class="s1">cursor</span><span class="s0">, </span><span class="s1">get_dt</span><span class="s0">, </span><span class="s1">get_ts</span>
+
+
+<span class="s0">def </span><span class="s1">get_pairs():</span>
+    <span class="s1">sql = </span><span class="s2">&quot;SELECT DISTINCT(name) FROM crypto.assets&quot;</span>
+    <span class="s1">cursor.execute(sql)</span>
+    <span class="s1">result = cursor.fetchall()</span>
+    <span class="s1">pairs = {}</span>
+
+    <span class="s0">for </span><span class="s1">coin </span><span class="s0">in </span><span class="s1">result:</span>
+        <span class="s0">for </span><span class="s1">coin2 </span><span class="s0">in </span><span class="s1">result:</span>
+            <span class="s1">pairs[coin[</span><span class="s3">0</span><span class="s1">] + coin2[</span><span class="s3">0</span><span class="s1">]] = [coin[</span><span class="s3">0</span><span class="s1">]</span><span class="s0">, </span><span class="s1">coin2[</span><span class="s3">0</span><span class="s1">]]</span>
+
+    <span class="s0">return </span><span class="s1">pairs</span>
+
+
+<span class="s0">async def </span><span class="s1">get_binance_pairs(client):</span>
+    <span class="s1">prices = sorted([price[</span><span class="s2">'symbol'</span><span class="s1">] </span><span class="s0">for </span><span class="s1">price </span><span class="s0">in await </span><span class="s1">client.get_all_tickers()])</span>
+    <span class="s0">return </span><span class="s1">prices</span>
+
+
+<span class="s0">def </span><span class="s1">get_max_id(where</span><span class="s0">, </span><span class="s1">pair):</span>
+    <span class="s1">sql_max = </span><span class="s2">&quot;SELECT MAX(orderId) FROM crypto.&quot; </span><span class="s1">+ where + </span><span class="s2">&quot; WHERE symbol=</span><span class="s0">\&quot;</span><span class="s2">&quot; </span><span class="s1">+ pair + </span><span class="s2">&quot;</span><span class="s0">\&quot;</span><span class="s2">&quot;</span>
+    <span class="s1">cursor.execute(sql_max)</span>
+    <span class="s1">max_id = cursor.fetchall()[</span><span class="s3">0</span><span class="s1">][</span><span class="s3">0</span><span class="s1">]</span>
+    <span class="s0">return </span><span class="s1">max_id + </span><span class="s3">1 </span><span class="s0">if </span><span class="s1">max_id </span><span class="s0">else </span><span class="s3">0</span>
+
+
+<span class="s0">async def </span><span class="s1">get_ord_and_trad(client</span><span class="s0">, </span><span class="s1">is_order=</span><span class="s3">1</span><span class="s1">):</span>
+    <span class="s1">message = </span><span class="s2">&quot;orders&quot; </span><span class="s0">if </span><span class="s1">is_order </span><span class="s0">else </span><span class="s2">&quot;trades&quot;</span>
+    <span class="s1">values = </span><span class="s3">18 </span><span class="s0">if </span><span class="s1">is_order </span><span class="s0">else </span><span class="s3">13</span>
+
+    <span class="s1">pairs = get_pairs()</span>
+    <span class="s1">binance_pairs = </span><span class="s0">await </span><span class="s1">get_binance_pairs(client)</span>
+    <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.&quot; </span><span class="s1">+ message + </span><span class="s2">&quot; VALUES (&quot; </span><span class="s1">+ (values-</span><span class="s3">1</span><span class="s1">)*</span><span class="s2">&quot;%s,&quot;</span><span class="s1">+</span><span class="s2">&quot; %s)&quot;</span>
+    <span class="s1">print(</span><span class="s2">&quot;GETTING &quot; </span><span class="s1">+ message.upper() + </span><span class="s2">&quot;...&quot;</span><span class="s1">)</span>
+    <span class="s0">for </span><span class="s1">pair </span><span class="s0">in </span><span class="s1">pairs.keys():</span>
+
+        <span class="s0">if </span><span class="s1">pair </span><span class="s0">in </span><span class="s1">binance_pairs:</span>
+            <span class="s1">ops = </span><span class="s0">await </span><span class="s1">client.get_all_orders(symbol=pair</span><span class="s0">, </span><span class="s1">orderId=get_max_id(message</span><span class="s0">, </span><span class="s1">pair)) </span><span class="s0">if </span><span class="s1">is_order </span><span class="s0">else </span><span class="s1">\</span>
+                <span class="s0">await </span><span class="s1">client.get_my_trades(symbol=pair</span><span class="s0">, </span><span class="s1">fromId=get_max_id(message</span><span class="s0">, </span><span class="s1">pair))</span>
+
+            <span class="s0">for </span><span class="s1">op </span><span class="s0">in </span><span class="s1">ops:</span>
+                <span class="s0">if </span><span class="s1">op:</span>
+                    <span class="s1">print(</span><span class="s2">&quot;GETTING &quot; </span><span class="s1">+ message.upper() + </span><span class="s2">&quot; for &quot; </span><span class="s1">+ pair)</span>
+                    <span class="s1">cursor.execute(sql</span><span class="s0">, </span><span class="s1">list(op.values()))</span>
+
+    <span class="s1">my_db.commit()</span>
+    <span class="s1">print(sep)</span>
+
+
+<span class="s0">async def </span><span class="s1">get_dust(client):</span>
+    <span class="s1">dust = </span><span class="s0">await </span><span class="s1">client.get_dust_log()</span>
+    <span class="s1">print(</span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">GETTING DUST EXCHANGE...&quot;</span><span class="s1">)</span>
+    <span class="s1">sql_max = </span><span class="s2">&quot;SELECT max(operateTime) FROM crypto.dust&quot;</span>
+    <span class="s1">cursor.execute(sql_max)</span>
+    <span class="s1">dust_db = cursor.fetchall()[</span><span class="s3">0</span><span class="s1">][</span><span class="s3">0</span><span class="s1">]</span>
+    <span class="s0">if not </span><span class="s1">dust_db:</span>
+        <span class="s1">dust_db = </span><span class="s3">0</span>
+
+    <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(dust[</span><span class="s2">&quot;total&quot;</span><span class="s1">]):</span>
+        <span class="s0">if </span><span class="s1">dust_db &lt; dust[</span><span class="s2">'userAssetDribblets'</span><span class="s1">][i][</span><span class="s2">'operateTime'</span><span class="s1">]:</span>
+            <span class="s1">j = </span><span class="s3">0</span>
+            <span class="s0">try</span><span class="s1">:</span>
+                <span class="s0">while </span><span class="s1">dust[</span><span class="s2">'userAssetDribblets'</span><span class="s1">][i][</span><span class="s2">'userAssetDribbletDetails'</span><span class="s1">][j]:</span>
+                    <span class="s1">details = dust[</span><span class="s2">'userAssetDribblets'</span><span class="s1">][i][</span><span class="s2">'userAssetDribbletDetails'</span><span class="s1">][j]</span>
+                    <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.dust VALUES (%s, %s,%s, %s, %s, %s)&quot;</span>
+                    <span class="s1">cursor.execute(sql</span><span class="s0">, </span><span class="s1">list(details.values()))</span>
+                    <span class="s1">j = j + </span><span class="s3">1</span>
+            <span class="s0">except </span><span class="s1">IndexError:</span>
+                <span class="s0">None</span>
+    <span class="s1">my_db.commit()</span>
+    <span class="s1">print(sep)</span>
+
+
+<span class="s0">async def </span><span class="s1">get_dividends(client</span><span class="s0">, </span><span class="s1">values=</span><span class="s3">6</span><span class="s1">):</span>
+    <span class="s4"># We know for a fact that there are older transactions that can be fetched from the</span>
+    <span class="s4"># /lending/union/interestHistory endpoint.</span>
+    <span class="s1">sql_max = </span><span class="s2">&quot;SELECT max(divTime) FROM crypto.dividends&quot;</span>
+    <span class="s1">cursor.execute(sql_max)</span>
+    <span class="s1">div_db = cursor.fetchall()[</span><span class="s3">0</span><span class="s1">][</span><span class="s3">0</span><span class="s1">]</span>
+
+    <span class="s0">if not </span><span class="s1">div_db:</span>
+        <span class="s1">div_db = zero_day_ns</span>
+
+    <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.dividends VALUES (&quot; </span><span class="s1">+ (values-</span><span class="s3">1</span><span class="s1">)*</span><span class="s2">&quot;%s,&quot;</span><span class="s1">+</span><span class="s2">&quot; %s)&quot;</span>
+    <span class="s1">more = </span><span class="s2">&quot; &quot;</span>
+    <span class="s1">q = now_ns</span>
+    <span class="s1">div = {</span><span class="s2">'total'</span><span class="s1">: </span><span class="s3">500</span><span class="s1">}</span>
+
+    <span class="s0">while </span><span class="s1">div[</span><span class="s2">'total'</span><span class="s1">] == </span><span class="s3">500</span><span class="s1">:</span>
+        <span class="s1">print(</span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">GETTING&quot; </span><span class="s1">+ more + </span><span class="s2">&quot;DIVIDENDS...&quot;</span><span class="s1">)</span>
+        <span class="s1">div = </span><span class="s0">await </span><span class="s1">client.get_asset_dividend_history(limit=</span><span class="s3">500</span><span class="s0">, </span><span class="s1">startTime=div_db + </span><span class="s3">1</span><span class="s0">, </span><span class="s1">endTime=q)</span>
+
+        <span class="s1">[cursor.execute(sql</span><span class="s0">, </span><span class="s1">list((div[</span><span class="s2">'rows'</span><span class="s1">][i]).values())) </span><span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">tqdm(range(</span><span class="s3">0</span><span class="s0">, </span><span class="s1">div[</span><span class="s2">&quot;total&quot;</span><span class="s1">]))]</span>
+
+        <span class="s0">if </span><span class="s1">div[</span><span class="s2">&quot;total&quot;</span><span class="s1">] == </span><span class="s3">500</span><span class="s1">:</span>
+            <span class="s1">more = </span><span class="s2">&quot; MORE &quot;</span>
+            <span class="s1">q = div[</span><span class="s2">'rows'</span><span class="s1">][</span><span class="s3">499</span><span class="s1">][</span><span class="s2">'divTime'</span><span class="s1">] - </span><span class="s3">1</span>
+
+    <span class="s1">my_db.commit()</span>
+    <span class="s4"># if div_db == zero_day_ns:</span>
+    <span class="s1">sql_min = </span><span class="s2">&quot;SELECT min(divTime) FROM crypto.dividends where enInfo != 'BNB Vault' or asset= 'BNB'&quot;</span>
+    <span class="s1">cursor.execute(sql_min)</span>
+    <span class="s1">div_db = get_ts(get_dt(cursor.fetchall()[</span><span class="s3">0</span><span class="s1">][</span><span class="s3">0</span><span class="s1">])</span><span class="s0">, </span><span class="s1">day=</span><span class="s3">1</span><span class="s1">)</span>
+    <span class="s1">print(div_db)</span>
+
+    <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.dividends VALUES (&quot; </span><span class="s1">+ (values - </span><span class="s3">1</span><span class="s1">) * </span><span class="s2">&quot;%s,&quot; </span><span class="s1">+ </span><span class="s2">&quot; %s)&quot;</span>
+
+    <span class="s0">for </span><span class="s1">lending_type </span><span class="s0">in </span><span class="s1">[</span><span class="s2">'DAILY'</span><span class="s0">, </span><span class="s2">'ACTIVITY'</span><span class="s0">, </span><span class="s2">'CUSTOMIZED_FIXED'</span><span class="s1">]:</span>
+        <span class="s1">a = list(range(</span><span class="s3">100</span><span class="s1">))</span>
+
+        <span class="s0">while </span><span class="s1">len(a) == </span><span class="s3">100</span><span class="s1">:</span>
+            <span class="s1">print(</span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">GETTING&quot; </span><span class="s1">+ more + </span><span class="s2">&quot; OLD DIVIDENDS...&quot;</span><span class="s1">)</span>
+            <span class="s1">a = </span><span class="s0">await </span><span class="s1">binance_old_dividends(lending_type=lending_type</span><span class="s0">, </span><span class="s1">end_time=div_db-</span><span class="s3">1</span><span class="s1">)</span>
+
+            <span class="s0">for </span><span class="s1">op </span><span class="s0">in </span><span class="s1">tqdm(a):</span>
+                <span class="s1">b = {</span><span class="s2">'id'</span><span class="s1">: </span><span class="s2">&quot;000000&quot;</span><span class="s0">, </span><span class="s2">'tranId'</span><span class="s1">: int(int(op[</span><span class="s2">'time'</span><span class="s1">])*float(op[</span><span class="s2">&quot;interest&quot;</span><span class="s1">]))</span><span class="s0">, </span><span class="s2">'asset'</span><span class="s1">: op[</span><span class="s2">'asset'</span><span class="s1">]</span><span class="s0">, </span><span class="s2">'amount'</span><span class="s1">: op[</span><span class="s2">'interest'</span><span class="s1">]</span><span class="s0">, </span><span class="s2">'divTime'</span><span class="s1">: op[</span><span class="s2">'time'</span><span class="s1">]</span><span class="s0">, </span><span class="s2">'enInfo'</span><span class="s1">: </span><span class="s2">'OLD ' </span><span class="s1">+ op[</span><span class="s2">'lendingType'</span><span class="s1">]}</span>
+                <span class="s1">cursor.execute(sql</span><span class="s0">, </span><span class="s1">list(b.values()))</span>
+
+            <span class="s0">if </span><span class="s1">len(a) == </span><span class="s3">100</span><span class="s1">:</span>
+                <span class="s1">more = </span><span class="s2">&quot; MORE &quot;</span>
+                <span class="s1">div_db = a[</span><span class="s3">100</span><span class="s1">][</span><span class="s2">'time'</span><span class="s1">]</span>
+
+    <span class="s1">my_db.commit()</span>
+    <span class="s1">print(sep)</span>
+
+
+<span class="s0">async def </span><span class="s1">get_fiat_dep_withdraws(is_withdraw=</span><span class="s3">0</span><span class="s0">, </span><span class="s1">nvalues=</span><span class="s3">9</span><span class="s1">):</span>
+    <span class="s1">orders = </span><span class="s0">await </span><span class="s1">binance_fiat_deposits(is_withdraw=is_withdraw)</span>
+    <span class="s1">message1 = </span><span class="s2">&quot;fiatWithdraws&quot; </span><span class="s0">if </span><span class="s1">is_withdraw </span><span class="s0">else </span><span class="s2">&quot;fiatDeposits&quot;</span>
+    <span class="s1">print(</span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">GETTING FIAT &quot; </span><span class="s1">+ (message1[</span><span class="s3">4</span><span class="s1">:]).upper() + </span><span class="s2">&quot;...&quot;</span><span class="s1">)</span>
+
+    <span class="s1">sql_max = </span><span class="s2">&quot;SELECT count(orderNo) FROM crypto.&quot; </span><span class="s1">+ message1</span>
+    <span class="s1">cursor.execute(sql_max)</span>
+    <span class="s1">wd_db = cursor.fetchall()</span>
+
+    <span class="s0">if </span><span class="s1">orders </span><span class="s0">is None</span><span class="s1">:</span>
+        <span class="s1">print(</span><span class="s2">&quot;NO FIAT &quot; </span><span class="s1">+ (message1[</span><span class="s3">4</span><span class="s1">:]).upper())</span>
+    <span class="s0">else</span><span class="s1">:</span>
+        <span class="s0">if </span><span class="s1">wd_db </span><span class="s0">is None</span><span class="s1">:</span>
+            <span class="s1">to_final = </span><span class="s3">0</span>
+        <span class="s0">else</span><span class="s1">:</span>
+            <span class="s1">to_final = orders[</span><span class="s2">&quot;total&quot;</span><span class="s1">] - wd_db[</span><span class="s3">0</span><span class="s1">][</span><span class="s3">0</span><span class="s1">]</span>
+        <span class="s1">print(</span><span class="s2">&quot;YOU HAVE GOT &quot; </span><span class="s1">+ str(to_final) + </span><span class="s2">&quot; NEW &quot; </span><span class="s1">+ (message1[</span><span class="s3">4</span><span class="s1">:]).upper())</span>
+        <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">tqdm(range(</span><span class="s3">0</span><span class="s0">, </span><span class="s1">to_final)):</span>
+            <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.&quot; </span><span class="s1">+ message1 + </span><span class="s2">&quot; VALUES (&quot; </span><span class="s1">+ (nvalues-</span><span class="s3">1</span><span class="s1">)*</span><span class="s2">&quot;%s, &quot; </span><span class="s1">+ </span><span class="s2">&quot;%s)&quot;</span>
+            <span class="s1">cursor.execute(sql</span><span class="s0">, </span><span class="s1">list((orders[</span><span class="s2">&quot;data&quot;</span><span class="s1">][i]).values()))</span>
+
+        <span class="s1">my_db.commit()</span>
+
+    <span class="s1">print(sep)</span>
+
+
+<span class="s0">async def </span><span class="s1">get_fiat_orders():</span>
+    <span class="s1">orders = </span><span class="s0">await </span><span class="s1">binance_fiat_orders()</span>
+    <span class="s1">print(</span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">GETTING FIAT ORDERS...&quot;</span><span class="s1">)</span>
+
+    <span class="s1">sql_max = </span><span class="s2">&quot;SELECT count(orderNo), typeOrder FROM crypto.fiatOrders GROUP BY typeOrder&quot;</span>
+    <span class="s1">cursor.execute(sql_max)</span>
+    <span class="s1">ord_db = cursor.fetchall()</span>
+
+    <span class="s0">if </span><span class="s1">orders </span><span class="s0">is None</span><span class="s1">:</span>
+        <span class="s1">print(</span><span class="s2">&quot;NO FIAT ORDERS&quot;</span><span class="s1">)</span>
+    <span class="s0">else</span><span class="s1">:</span>
+        <span class="s0">for </span><span class="s1">loop_i</span><span class="s0">, </span><span class="s1">typeOrder </span><span class="s0">in </span><span class="s1">enumerate([</span><span class="s2">&quot;sell&quot;</span><span class="s0">, </span><span class="s2">&quot;buy&quot;</span><span class="s1">]):</span>
+
+            <span class="s0">if not </span><span class="s1">ord_db </span><span class="s0">or </span><span class="s1">len(ord_db) &lt; loop_i + </span><span class="s3">1</span><span class="s1">:</span>
+                <span class="s1">from_w = </span><span class="s3">0</span>
+            <span class="s0">else</span><span class="s1">:</span>
+                <span class="s1">from_w = ord_db[loop_i][</span><span class="s3">0</span><span class="s1">]</span>
+
+            <span class="s1">to_final = orders[typeOrder][</span><span class="s2">&quot;total&quot;</span><span class="s1">] - from_w</span>
+            <span class="s1">print(</span><span class="s2">&quot;YOU HAVE GOT &quot; </span><span class="s1">+ str(to_final) + </span><span class="s2">&quot; NEW &quot; </span><span class="s1">+ typeOrder.upper())</span>
+            <span class="s0">for </span><span class="s1">i </span><span class="s0">in </span><span class="s1">range(from_w</span><span class="s0">, </span><span class="s1">to_final):</span>
+                <span class="s1">val = (list((orders[typeOrder][</span><span class="s2">&quot;data&quot;</span><span class="s1">][i]).values()))</span>
+                <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.fiatOrders VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)&quot;</span>
+                <span class="s1">val.append(typeOrder)</span>
+                <span class="s1">cursor.execute(sql</span><span class="s0">, </span><span class="s1">val)</span>
+
+        <span class="s1">my_db.commit()</span>
+
+    <span class="s1">print(sep)</span>
+
+
+<span class="s0">async def </span><span class="s1">get_dep_with(client</span><span class="s0">, </span><span class="s1">is_deposit=</span><span class="s3">1</span><span class="s1">):</span>
+    <span class="s1">message = </span><span class="s2">&quot;deposits&quot; </span><span class="s0">if </span><span class="s1">is_deposit </span><span class="s0">else </span><span class="s2">&quot;withdraws&quot;</span>
+    <span class="s1">values = </span><span class="s3">12</span>
+    <span class="s1">tim = </span><span class="s2">&quot;insertTime&quot; </span><span class="s0">if </span><span class="s1">is_deposit </span><span class="s0">else </span><span class="s2">&quot;applyTime&quot;</span>
+
+    <span class="s1">sql_max = </span><span class="s2">&quot;SELECT max(&quot; </span><span class="s1">+ tim + </span><span class="s2">&quot;) FROM crypto.&quot; </span><span class="s1">+ message</span>
+    <span class="s1">cursor.execute(sql_max)</span>
+    <span class="s1">from_date = cursor.fetchall()[</span><span class="s3">0</span><span class="s1">][</span><span class="s3">0</span><span class="s1">]</span>
+
+    <span class="s0">if </span><span class="s1">from_date </span><span class="s0">and </span><span class="s1">tim == </span><span class="s2">&quot;applyTime&quot;</span><span class="s1">:</span>
+        <span class="s1">from_date = int(from_date.timestamp())*</span><span class="s3">1000 </span><span class="s1">+ </span><span class="s3">1</span>
+        
+    <span class="s0">if not </span><span class="s1">from_date:</span>
+        <span class="s1">from_date = zero_day_ns</span>
+
+    <span class="s1">print(</span><span class="s2">&quot;</span><span class="s0">\n</span><span class="s2">GETTING &quot; </span><span class="s1">+ message.upper() + </span><span class="s2">&quot;...&quot;</span><span class="s1">)</span>
+    <span class="s0">for </span><span class="s1">start_date </span><span class="s0">in </span><span class="s1">range(from_date + </span><span class="s3">1000</span><span class="s0">, </span><span class="s1">now_ns</span><span class="s0">, </span><span class="s3">90 </span><span class="s1">* day_timestamp_ns):</span>
+        <span class="s1">final = (start_date + </span><span class="s3">90 </span><span class="s1">* day_timestamp_ns)</span>
+        <span class="s1">div = </span><span class="s0">await </span><span class="s1">client.get_deposit_history(startTime=start_date</span><span class="s0">, </span><span class="s1">endTime=final) </span><span class="s0">if </span><span class="s1">is_deposit </span><span class="s0">else </span><span class="s1">\</span>
+            <span class="s0">await </span><span class="s1">client.get_withdraw_history(startTime=start_date</span><span class="s0">, </span><span class="s1">endTime=final)</span>
+        <span class="s0">for </span><span class="s1">op </span><span class="s0">in </span><span class="s1">div:</span>
+            <span class="s1">sql = </span><span class="s2">&quot;INSERT INTO crypto.&quot; </span><span class="s1">+ message + </span><span class="s2">&quot; VALUES (&quot; </span><span class="s1">+ (values-</span><span class="s3">1</span><span class="s1">)*</span><span class="s2">&quot;%s, &quot; </span><span class="s1">+ </span><span class="s2">&quot;%s)&quot;</span>
+            <span class="s0">if </span><span class="s1">op:</span>
+                <span class="s1">cursor.execute(sql</span><span class="s0">, </span><span class="s1">list(op.values()))</span>
+        <span class="s1">my_db.commit()</span>
+    <span class="s1">print(sep)</span>
+</pre>
+</body>
+</html>
