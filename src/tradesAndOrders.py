@@ -19,7 +19,6 @@ def get_pairs():
 
 async def get_binance_pairs(client):
     prices = sorted([price['symbol'] for price in await client.get_all_tickers()])
-    orders = orders +
     return prices
 
 
