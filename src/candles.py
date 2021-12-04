@@ -57,6 +57,7 @@ async def get_candles(client):
     pairs = sorted([price['symbol'] for price in await client.get_all_tickers()])
     now_db = int(time()) * 1000
 
-    [await parallelize_candles(pair, now_db, client) for pair in pairs if ("EUR" in pair or "USDT" in pair or pair == "BETHETH") and pair in pairs_db]
+    [await parallelize_candles(pair, now_db, client) for pair in pairs if ("EUR" in pair or "USDT" in pair or
+                                                                           pair == "BETHETH") and pair in pairs_db]
 
     print(sep)
