@@ -68,4 +68,3 @@ async def binance_swap():
 
 async def cross_pairs():
     return await base_get(path=us.cross_margin, params={})
-
