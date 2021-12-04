@@ -102,28 +102,28 @@ async def get_dividends(client, values=6):
             q = div['rows'][499]['divTime'] - 1
 
     my_db.commit()
-    # if div_db == zero_day_ns:
-    sql_min = "SELECT min(divTime) FROM crypto.dividends where enInfo != 'BNB Vault' or asset= 'BNB'"
-    cursor.execute(sql_min)
-    div_db = get_ts(get_dt(cursor.fetchall()[0][0]), day=1)
+    if div_db == zero_day_ns:
+        sql_min = "SELECT min(divTime) FROM crypto.dividends where enInfo != 'BNB Vault' or asset= 'BNB'"
+        cursor.execute(sql_min)
+        div_db = get_ts(get_dt(cursor.fetchall()[0][0]), day=1)
 
-    sql = "INSERT INTO crypto.dividends VALUES (" + (values - 1) * "%s," + " %s)"
+        sql = "INSERT INTO crypto.dividends VALUES (" + (values - 1) * "%s," + " %s)"
 
-    for lending_type in ['DAILY', 'ACTIVITY', 'CUSTOMIZED_FIXED']:
-        a = list(range(100))
+        for lending_type in ['DAILY', 'ACTIVITY', 'CUSTOMIZED_FIXED']:
+            a = list(range(100))
 
-        while len(a) == 100:
-            print("\nGETTING" + more + " OLD DIVIDENDS...")
-            a = await binance_old_dividends(lending_type=lending_type, end_time=div_db-1)
+            while len(a) == 100:
+                print("\nGETTING" + more + " OLD DIVIDENDS...")
+                a = await binance_old_dividends(lending_type=lending_type, end_time=div_db-1)
 
-            for op in tqdm(a):
-                b = {'id': "000000", 'tranId': int(int(op['time'])*float(op["interest"])), 'asset': op['asset'],
-                     'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
-                cursor.execute(sql, list(b.values()))
+                for op in tqdm(a):
+                    b = {'id': "000000", 'tranId': int(int(op['time'])*float(op["interest"])), 'asset': op['asset'],
+                         'amount': op['interest'], 'divTime': op['time'], 'enInfo': 'OLD ' + op['lendingType']}
+                    cursor.execute(sql, list(b.values()))
 
-            if len(a) == 100:
-                more = " MORE "
-                div_db = a[100]['time']
+                if len(a) == 100:
+                    more = " MORE "
+                    div_db = a[100]['time']
 
     my_db.commit()
     print(sep)
