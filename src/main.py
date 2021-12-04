@@ -21,7 +21,7 @@ async def main():
     await tao.get_ord_and_trad(client, 0)
     print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_dividends(client)
-    print((client.response.headers)['x-mbx-used-weight-1m'])
+    print((client.response.headers))
     await tao.get_ord_and_trad(client, 1)
     print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_dust(client)
