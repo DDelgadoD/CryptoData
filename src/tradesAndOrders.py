@@ -227,7 +227,6 @@ async def get_margin(client):
     print("GETTING " + message.upper() + "...")
     info = await cross_pairs()
     for i in tqdm(range(len(info))):
-        print(i)
         ops = await client.get_all_margin_orders(symbol=info[i]['symbol'], orderId=get_max_id(message,
                                                                                               info[i]['symbol']))
 
