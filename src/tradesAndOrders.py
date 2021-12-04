@@ -221,7 +221,8 @@ async def get_margin(client):
     sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s,"+" %s)"
     print("GETTING " + message.upper() + "...")
     info = await cross_pairs()
-    for i in range(len(info)):
+    for i in tqdm(range(len(info))):
+        print(i)
         ops = await client.get_all_margin_orders(symbol=info[i]['symbol'], orderId=get_max_id(message,
                                                                                               info[i]['symbol']))
 
@@ -229,6 +230,7 @@ async def get_margin(client):
             if op:
                 print("GETTING " + message.upper() + " for " + info[i]['symbol'])
                 cursor.execute(sql, list(op.values()))
+
     my_db.commit()
     print(sep)
 

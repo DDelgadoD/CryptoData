@@ -18,14 +18,14 @@ async def main():
 
     # Operations
     ## python-binance
-    await tao.get_dividends(client)
-    await tao.get_dust(client)
     await tao.get_ord_and_trad(client, 0)
+    await tao.get_dividends(client)
     await tao.get_ord_and_trad(client, 1)
+    await tao.get_dust(client)
     await tao.get_margin(client)
-    await tao.get_iso_margin(client)
     await tao.get_dep_with(client, 1)
     await tao.get_dep_with(client, 0)
+    await tao.get_iso_margin(client)
     ## Custom
     await tao.get_fiat_orders()
     await tao.get_fiat_dep_withdraws(is_withdraw=1)
