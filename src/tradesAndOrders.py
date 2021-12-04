@@ -48,8 +48,10 @@ async def get_ord_and_trad(client, is_order=1):
                 if op:
                     print("GETTING " + message.upper() + " for " + pair)
                     cursor.execute(sql, list(op.values()))
+
         if (client.response.headers)['x-mbx-used-weight-1m'] > 1150:
-            time.sleep(5)
+            time.sleep(15)
+
     my_db.commit()
     print(sep)
 
