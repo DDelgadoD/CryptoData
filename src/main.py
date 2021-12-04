@@ -19,9 +19,11 @@ async def main():
     # Operations
     ## python-binance
     await tao.get_ord_and_trad(client, 0)
-    print(client.response.headers)
+    print(client.response.headers['x-mbx-used-weight-1m'])
     await tao.get_dividends(client)
+    print(client.response.headers['x-mbx-used-weight-1m'])
     await tao.get_ord_and_trad(client, 1)
+    print(client.response.headers['x-mbx-used-weight-1m'])
     await tao.get_dust(client)
     await tao.get_dep_with(client, 1)
     await tao.get_dep_with(client, 0)
