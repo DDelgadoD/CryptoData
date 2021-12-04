@@ -1,6 +1,6 @@
 from tqdm import tqdm
 
-from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends
+from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends, cross_pairs
 from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor, get_dt, get_ts
 
 
@@ -218,18 +218,17 @@ async def get_margin(client):
     message = "marginOrders"
     values = 17
 
-    pairs = get_pairs()
-    binance_pairs = await get_binance_pairs(client)
     sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s,"+" %s)"
     print("GETTING " + message.upper() + "...")
-    for pair in pairs.keys():
-        if pair in binance_pairs:
-            ops = await client.get_all_margin_orders(symbol=pair, orderId=get_max_id(message, pair))
+    info = await cross_pairs()
+    for i in range(len(info)):
+        ops = await client.get_all_margin_orders(symbol=info[i]['symbol'], orderId=get_max_id(message,
+                                                                                              info[i]['symbol']))
 
-            for op in ops:
-                if op:
-                    print("GETTING " + message.upper() + " for " + pair)
-                    cursor.execute(sql, list(op.values()))
+        for op in ops:
+            if op:
+                print("GETTING " + message.upper() + " for " + info[i]['symbol'])
+                cursor.execute(sql, list(op.values()))
     my_db.commit()
     print(sep)
 

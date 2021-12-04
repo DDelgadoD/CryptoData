@@ -65,3 +65,6 @@ async def binance_old_dividends(start_time=us.zero_day_ns, end_time=us.zero_day_
 async def binance_swap():
     return await base_get(path=us.swap, params={'timestamp': int(time.time() * 1000)})
 
+async def cross_pairs():
+    return await base_get(path=us.cross_margin)
+

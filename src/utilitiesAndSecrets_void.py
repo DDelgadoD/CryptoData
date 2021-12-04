@@ -6,8 +6,11 @@ from datetime import datetime
 api_key = ""
 api_secret = ""
 
+key_coinbase = ""
+secret_coinbase = ""
+
 # LOG
-log_path = "crypto.log"
+log_path = ""
 m_log = {"start": 'Started Crypto Database process',
          "end": 'Ended Crypto Database process'}
 
@@ -17,6 +20,7 @@ fiat_orders = '/sapi/v1/fiat/orders'
 fiat_payments = '/sapi/v1/fiat/payments'
 old_dividends = '/sapi/v1/lending/union/interestHistory'
 swap = '/sapi/v1/bswap/swap'
+cross_margin = '/sapi/v1/margin/allPairs'
 headers = {'X-MBX-APIKEY': api_key}
 
 # date and time
@@ -41,8 +45,8 @@ def get_dt(ts, sec=0, day=0):
     return dt
 
 
-def get_ts(dt, sec=0, day=0):
-    dt = datetime.strptime(dt, "%Y-%m-%d %H:%M:%S") if type(dt) is str else dt
+def get_ts(dt, sec=0, day=0, formt="%Y-%m-%d %H:%M:%S"):
+    dt = datetime.strptime(dt, formt) if type(dt) is str else dt
     ts = datetime.timestamp(dt) if sec == 1 else int(datetime.timestamp(dt) * 1000)
     return ts
 
@@ -61,10 +65,10 @@ local_password = ""
 
 def connect():
     return mysql.connector.connect(
-        host=host,
-        user=user,
-        password=password
-    )
+          host=host,
+          user=user,
+          password=password
+   )
 
 
 # Connect to Local Database
