@@ -22,10 +22,12 @@ async def main():
     print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_dividends(client)
     await tao.get_ord_and_trad(client, 1)
-    print((client.response.headers)['x-mbx-used-weight-1m'])
+
     await tao.get_dust(client)
     await tao.get_dep_with(client, 1)
+    print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_dep_with(client, 0)
+    print((client.response.headers)['x-mbx-used-weight-1m'])
     await tao.get_iso_margin(client)
     ## Custom
     await tao.get_fiat_orders()

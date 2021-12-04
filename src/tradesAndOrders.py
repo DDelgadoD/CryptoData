@@ -192,7 +192,7 @@ async def get_fiat_orders():
 
 async def get_dep_with(client, is_deposit=1):
     message = "deposits" if is_deposit else "withdraws"
-    values = 12
+    values = 12 if is_deposit else 13
     tim = "insertTime" if is_deposit else "applyTime"
 
     sql_max = "SELECT max(" + tim + ") FROM crypto." + message
