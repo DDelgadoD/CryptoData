@@ -66,5 +66,5 @@ async def binance_swap():
     return await base_get(path=us.swap, params={'timestamp': int(time.time() * 1000)})
 
 async def cross_pairs():
-    return await base_get(path=us.cross_margin)
+    return await base_get(path=us.cross_margin, params={})
 
