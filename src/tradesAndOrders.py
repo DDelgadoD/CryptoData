@@ -235,6 +235,8 @@ async def get_margin(client):
                 print("GETTING " + message.upper() + " for " + info[i]['symbol'])
                 cursor.execute(sql, list(op.values()))
 
+        print(client.response.headers)
+
     my_db.commit()
     print(sep)
 
@@ -255,9 +257,6 @@ async def get_iso_margin(client):
             if op:
                 print("GETTING ISOLATED" + message.upper() + " for " + info['assets'][i]['symbol'])
                 cursor.execute(sql, list(op.values()))
-
-            print(client.response.headers)
-            print("a little pause....")
 
     my_db.commit()
     print(sep)
