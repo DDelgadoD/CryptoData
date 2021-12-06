@@ -51,7 +51,7 @@ async def get_ord_and_trad(client, is_order=1):
                     cursor.execute(sql, list(op.values()))
 
             if int((client.response.headers)['x-mbx-used-weight-1m']) > 1150:
-                print("a little pause....")
+                logging.info(m_log["pauseO"])
                 sleep(30)
 
     my_db.commit()
@@ -236,8 +236,8 @@ async def get_margin(client):
                 print("GETTING " + message.upper() + " for " + info[i]['symbol'])
                 cursor.execute(sql, list(op.values()))
 
-        if int((client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M']) > 11900:
-            logging.info(m_log["pause"])
+        if int((client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M']) > 11500:
+            logging.info(m_log["pauseM"])
             sleep(30)
 
     my_db.commit()

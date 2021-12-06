@@ -13,7 +13,8 @@ secret_coinbase = ""
 log_path = ""
 m_log = {"start": 'Started Crypto Database process',
          "end": 'Ended Crypto Database process',
-         "pause": '#### Pause Needed on Margin Orders + %(funcName)s'}
+         "pauseM": '#### Pause Needed on Margin Orders',
+         "pauseO" : '#### Pause Needed on Orders'}
 
 # Custom api frontends
 BASE_URL = 'https://api.binance.com'
