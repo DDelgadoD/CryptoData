@@ -256,5 +256,9 @@ async def get_iso_margin(client):
                 print("GETTING ISOLATED" + message.upper() + " for " + info['assets'][i]['symbol'])
                 cursor.execute(sql, list(op.values()))
 
+        if int((client.response.headers)['x-mbx-used-weight-1m']) > 1190:
+            print("a little pause....")
+            sleep(30)
+
     my_db.commit()
     print(sep)
