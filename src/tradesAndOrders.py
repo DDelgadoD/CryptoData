@@ -238,7 +238,7 @@ async def get_margin(client):
 
         if int((client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M']) > 11500:
             logging.info(m_log["pauseM"])
-            sleep(30)
+            sleep(60)
 
     my_db.commit()
     print(sep)
