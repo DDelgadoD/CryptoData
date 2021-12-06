@@ -235,7 +235,7 @@ async def get_margin(client):
                 print("GETTING " + message.upper() + " for " + info[i]['symbol'])
                 cursor.execute(sql, list(op.values()))
 
-        if (client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M'] > 11950:
+        if int((client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M']) > 11950:
             print("a little pause....")
             sleep(30)
 
