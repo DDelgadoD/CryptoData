@@ -1,8 +1,9 @@
 from tqdm import tqdm
 from time import sleep
+import logging
 
 from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends, cross_pairs
-from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor, get_dt, get_ts
+from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor, get_dt, get_ts, m_log
 
 
 def get_pairs():
@@ -235,8 +236,8 @@ async def get_margin(client):
                 print("GETTING " + message.upper() + " for " + info[i]['symbol'])
                 cursor.execute(sql, list(op.values()))
 
-        if int((client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M']) > 11950:
-            print("a little pause....")
+        if int((client.response.headers)['X-SAPI-USED-IP-WEIGHT-1M']) > 11900:
+            logging.info(m_log["pause"])
             sleep(30)
 
     my_db.commit()
