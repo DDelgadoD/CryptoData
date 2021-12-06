@@ -49,7 +49,7 @@ async def get_ord_and_trad(client, is_order=1):
                     print("GETTING " + message.upper() + " for " + pair)
                     cursor.execute(sql, list(op.values()))
 
-        if int((client.response.headers)['x-mbx-used-weight-1m']) > 1190:
+        if int((client.response.headers)['x-mbx-used-weight-1m']) > 1150:
             print("a little pause....")
             sleep(30)
 
