@@ -3,8 +3,8 @@ from binance import AsyncClient
 import logging
 
 import tradesAndOrders as tao
-# from assets import get_assets_snap
-# from candles import get_candles
+from assets import get_assets_snap
+from candles import get_candles
 from utilitiesAndSecrets import api_secret, api_key, m_log, log_path
 
 
@@ -13,8 +13,8 @@ async def main():
     logging.info(m_log["start"])
 
     # Candles
-    # await get_assets_snap(client)
-    # await get_candles(client)
+    await get_assets_snap(client)
+    await get_candles(client)
 
     # Operations
     ## python-binance
@@ -25,11 +25,11 @@ async def main():
     await tao.get_dep_with(client, 1)
     await tao.get_dep_with(client, 0)
     await tao.get_iso_margin(client)
-    ## Custom
+    await tao.get_margin(client)
+    ## Custom-binance
     await tao.get_fiat_orders()
     await tao.get_fiat_dep_withdraws(is_withdraw=1)
     await tao.get_fiat_dep_withdraws(is_withdraw=0)
-    await tao.get_margin(client)
 
     await client.close_connection()
     logging.info(m_log["end"])
