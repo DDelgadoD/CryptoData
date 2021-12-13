@@ -6,6 +6,7 @@ import tradesAndOrders as tao
 from assets import get_assets_snap
 from candles import get_candles
 from utilitiesAndSecrets import api_secret, api_key, m_log, log_path
+import GettingCoinbase
 
 
 async def main():
@@ -32,6 +33,7 @@ async def main():
     await tao.get_fiat_dep_withdraws(is_withdraw=0)
 
     await client.close_connection()
+    GettingCoinbase.main()
     logging.info(m_log["end"])
 
 if __name__ == "__main__":
