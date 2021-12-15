@@ -14,7 +14,9 @@ log_path = ""
 m_log = {"start": 'Started Crypto Database process',
          "end": 'Ended Crypto Database process',
          "pauseM": '#### Pause Needed on Margin Orders',
-         "pauseO" : '#### Pause Needed on Orders'}
+         "pauseO": '#### Pause Needed on Orders',
+         "CoinbaseStart": '#### Started Coinbase plugin',
+         "CoinbaseEnd": '#### Ended Coinbase plugin'}
 
 # Custom api frontends
 BASE_URL = 'https://api.binance.com'

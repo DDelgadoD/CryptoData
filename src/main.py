@@ -33,7 +33,9 @@ async def main():
     await tao.get_fiat_dep_withdraws(is_withdraw=0)
 
     await client.close_connection()
+    # Coinbase
     GettingCoinbase.main()
+
     logging.info(m_log["end"])
 
 if __name__ == "__main__":

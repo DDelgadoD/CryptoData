@@ -1,8 +1,9 @@
 import pandas as pd
 from coinbase.wallet.client import Client
-from utilitiesAndSecrets import secret_coinbase, key_coinbase, cursor, my_db
+from utilitiesAndSecrets import secret_coinbase, key_coinbase, cursor, my_db, m_log
 import datetime as dt
 from tqdm import tqdm
+import logging
 
 
 def get_max_id(col, db, mod=""):
@@ -92,6 +93,7 @@ def process_trades(trades_df, sql):
 
 ##### main #####
 def main():
+    logging.info(m_log["CoinbaseStart"])
     client = Client(key_coinbase, secret_coinbase)
     coin_df = pd.DataFrame(columns=["dateTS", "dateH", "sentAmount", "sentCurrency", "receivedAmount",
                                     "receivedCurrency", "feeAmount", "feeCurrency", "netWorthAmount",
@@ -110,3 +112,4 @@ def main():
         process_trades(coin_df, sql)
 
     my_db.commit()
+    logging.info(m_log["CoinbaseEnd"])
