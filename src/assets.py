@@ -5,11 +5,11 @@ from utilitiesAndSecrets import month_timestamp_ns, zero_day_s, day_timestamp_s,
 
 
 def assets_snap_db(line):
-    sql = "INSERT INTO crypto.assets VALUES (%s, %s, %s)"
+    sql = "INSERT INTO crypto.assets VALUES (%s, %s, %s, %s)"
     date = line[0]
 
     for key, value in line[1].items():
-        val = (date, key, str(value))
+        val = (date, key, str(value), "Binance")
         cursor.execute(sql, val)
 
     my_db.commit()

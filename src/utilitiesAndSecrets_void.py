@@ -9,14 +9,21 @@ api_secret = ""
 key_coinbase = ""
 secret_coinbase = ""
 
+BSC_KEY = ""
+BSC_ADDRESSES = {}
+
 # LOG
 log_path = ""
-m_log = {"start": 'Started Crypto Database process',
+m_log = {
+         "start": 'Started Crypto Database process',
          "end": 'Ended Crypto Database process',
          "pauseM": '#### Pause Needed on Margin Orders',
          "pauseO": '#### Pause Needed on Orders',
          "CoinbaseStart": '#### Started Coinbase plugin',
-         "CoinbaseEnd": '#### Ended Coinbase plugin'}
+         "CoinbaseEnd": '#### Ended Coinbase plugin',
+         "BSCStart": '#### Started BSC plugin',
+         "BSCEnd": '#### Ended BSC plugin'
+         }
 
 # Custom api frontends
 BASE_URL = 'https://api.binance.com'
@@ -53,6 +60,7 @@ def get_ts(dt, sec=0, day=0, formt="%Y-%m-%d %H:%M:%S"):
     dt = datetime.strptime(dt, formt) if type(dt) is str else dt
     ts = datetime.timestamp(dt) if sec == 1 else int(datetime.timestamp(dt) * 1000)
     return ts
+
 
 sep = "\n##############################################\n"
 
