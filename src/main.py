@@ -16,8 +16,10 @@ async def main():
     # Candles from Binance
     await get_assets_snap(client)
     await get_candles(client)
+    # TODO: Add candlesGecko
 
     # Binance
+    # TODO: move this all to GettingBinance
     ## python-binance
     await tao.get_ord_and_trad(client, 0)
     await tao.get_dividends(client)
@@ -25,8 +27,9 @@ async def main():
     await tao.get_dust(client)
     await tao.get_dep_with(client, 1)
     await tao.get_dep_with(client, 0)
-    await tao.get_iso_margin(client)
-    await tao.get_margin(client)
+    await tao.get_iso_margin_orders(client)
+    await tao.get_margin_orders(client)
+    await tao.margin_trades(client)
     ## Custom-binance
     await tao.get_fiat_orders()
     await tao.get_fiat_dep_withdraws(is_withdraw=1)

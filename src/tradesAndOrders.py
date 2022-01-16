@@ -24,8 +24,8 @@ async def get_binance_pairs(client):
     return prices
 
 
-def get_max_id(where, pair, mod=""):
-    sql_max = "SELECT MAX(orderId) FROM crypto." + where + " WHERE symbol=\"" + pair + "\"" + mod
+def get_max_id(where, pair, mod="", what="OrderId"):
+    sql_max = "SELECT MAX(" + what + ") FROM crypto." + where + " WHERE symbol=\"" + pair + "\"" + mod
     cursor.execute(sql_max)
     max_id = cursor.fetchall()[0][0]
     return max_id + 1 if max_id else 0
@@ -202,7 +202,7 @@ async def get_dep_with(client, is_deposit=1):
     from_date = cursor.fetchall()[0][0]
 
     if from_date and tim == "applyTime":
-        from_date = int(from_date.timestamp())*1000 + 1
+        from_date = int(from_date.timestamp())*1000 + 1000
         
     if not from_date:
         from_date = zero_day_ns
@@ -213,14 +213,14 @@ async def get_dep_with(client, is_deposit=1):
         div = await client.get_deposit_history(startTime=start_date, endTime=final) if is_deposit else \
             await client.get_withdraw_history(startTime=start_date, endTime=final)
         for op in div:
-            sql = "INSERT INTO crypto." + message + " VALUES (" + (values-1)*"%s, " + "%s)"
             if op:
+                sql = "INSERT INTO crypto." + message + " VALUES (" + (len(op) - 1) * "%s, " + "%s)"
                 cursor.execute(sql, list(op.values()))
         my_db.commit()
     print(sep)
 
 
-async def get_margin(client):
+async def get_margin_orders(client):
     message = "marginOrders"
     values = 17
 
@@ -244,7 +244,7 @@ async def get_margin(client):
     print(sep)
 
 
-async def get_iso_margin(client):
+async def get_iso_margin_orders(client):
     message = "marginOrders"
     values = 17
 
@@ -263,3 +263,59 @@ async def get_iso_margin(client):
 
     my_db.commit()
     print(sep)
+
+
+# DONE: Get margin trades (iso/cross)
+async def margin_trades(client):
+    values = 12
+    sql = "SELECT distinct(symbol) from crypto.marginOrders where isISolated = 0"
+    cursor.execute(sql)
+    cross_symbols = [item[0] for item in cursor.fetchall()]
+    sql = "SELECT distinct(symbol) from crypto.marginOrders where isISolated = 1"
+    cursor.execute(sql)
+    iso_symbols = [item[0] for item in cursor.fetchall()]
+
+    sql = "SELECT MAX(time) from crypto.tradesMargin"
+    cursor.execute(sql)
+    time = cursor.fetchall()[0][0]
+    time = time + 1 if time else 0
+
+    sql = sql = "INSERT INTO crypto.tradesMargin VALUES (" + (values-1)*"%s,"+" %s)"
+    for symbol in iso_symbols:
+        ops = await client.get_margin_trades(symbol=symbol, isIsolated='TRUE', startTime=time)
+        for op in ops:
+            if op:
+                print("GETTING ISOLATED MARGIN TRADES for " + symbol)
+                cursor.execute(sql, list(op.values()))
+
+    for symbol in cross_symbols:
+        ops = await client.get_margin_trades(symbol=symbol, startTime=time)
+        for op in ops:
+            if op:
+                print("GETTING CROSS MARGIN TRADES for " + symbol)
+                cursor.execute(sql, list(op.values()))
+
+    my_db.commit()
+    print(sep)
+
+
+# TODO: Get loan/repay margin
+async def margin_loans(client):
+    sql = "SELECT distinct(symbol) from crypto.tradesMargin where isISolated = 0"
+    cursor.execute(sql)
+    iso_symbols = [item[0] for item in cursor.fetchall()]
+    print(iso_symbols)
+
+    for symbol in iso_symbols:
+        sql = "SELECT distinct(commissionAsset) from crypto.tradesMargin where symbol='" + symbol + "'"
+        cursor.execute(sql)
+        assets = [item[0] for item in cursor.fetchall()]
+        print(assets)
+        for asset in assets:
+            print(asset)
+            for start_date in range(zero_day_ns, now_ns, 90 * day_timestamp_ns):
+                print(start_date, "-", (start_date + 90 * day_timestamp_ns))
+                details = await client.get_margin_loan_details(asset=asset, startTime=start_date,
+                                                               endTime=(start_date + 90 * day_timestamp_ns),
+                                                               archived='true')
+                print(details)

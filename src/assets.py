@@ -66,3 +66,5 @@ async def get_assets_snap(client, op_type='SPOT'):
             assets_snap_db([date, snapshot[date]])
 
     print("\n##############################################\n")
+
+# TODO: Assets in other Exchanges
