@@ -2,7 +2,7 @@ from tqdm import tqdm
 from time import sleep
 import logging
 
-from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends, cross_pairs
+from customAPI import binance_fiat_deposits, binance_fiat_orders, binance_old_dividends, cross_pairs, margin_loans_custom
 from utilitiesAndSecrets import zero_day_ns, now_ns, day_timestamp_ns, sep, my_db, cursor, get_dt, get_ts, m_log
 
 
@@ -300,22 +300,22 @@ async def margin_trades(client):
 
 
 # TODO: Get loan/repay margin
-async def margin_loans(client):
-    sql = "SELECT distinct(symbol) from crypto.tradesMargin where isISolated = 0"
+async def margin_loans():
+    sql = "SELECT distinct(symbol) from crypto.tradesMargin where isISolated = 1"
     cursor.execute(sql)
     iso_symbols = [item[0] for item in cursor.fetchall()]
     print(iso_symbols)
 
     for symbol in iso_symbols:
+        print(symbol)
         sql = "SELECT distinct(commissionAsset) from crypto.tradesMargin where symbol='" + symbol + "'"
         cursor.execute(sql)
         assets = [item[0] for item in cursor.fetchall()]
         print(assets)
         for asset in assets:
             print(asset)
-            for start_date in range(zero_day_ns, now_ns, 90 * day_timestamp_ns):
-                print(start_date, "-", (start_date + 90 * day_timestamp_ns))
-                details = await client.get_margin_loan_details(asset=asset, startTime=start_date,
-                                                               endTime=(start_date + 90 * day_timestamp_ns),
-                                                               archived='true')
+            for start_date in range(zero_day_ns, now_ns, 30 * day_timestamp_ns):
+                end_date = (start_date + 30 * day_timestamp_ns)
+                print(start_date, "-", end_date)
+                details = await margin_loans_custom(asset=asset, symbol=symbol, start_time=start_date)
                 print(details)

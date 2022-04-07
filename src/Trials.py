@@ -11,8 +11,7 @@ import GettingCoinbase
 
 async def main():
     client = await AsyncClient.create(api_key=api_key, api_secret=api_secret)
-    # await tao.margin_loans(client)
-    await tao.get_dep_with(client, 0)
+    await tao.margin_loans()
     # TODO: get BSC, ETH, WAX, COSMOS.
     await client.close_connection()
 

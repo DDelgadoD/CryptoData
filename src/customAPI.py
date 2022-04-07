@@ -30,6 +30,7 @@ async def base_get(path, params):
 
     url = urljoin(us.BASE_URL, path)
     r = requests.get(url, headers=us.headers, params=params)
+
     if r.status_code == 200:
         data = r.json()
     else:
@@ -68,3 +69,15 @@ async def binance_swap():
 
 async def cross_pairs():
     return await base_get(path=us.cross_margin, params={})
+
+
+async def margin_loans_custom(asset, symbol=None, start_time=us.zero_day_ns):
+
+    if symbol is None:
+        params = {'asset': asset, 'startTime': start_time,
+                  'archived': 'true', 'timestamp': int(time.time() * 1000)}
+    else:
+        params = {'asset': asset, 'isolatedSymbol': symbol, 'startTime': start_time,
+                  'archived': 'true', 'timestamp': int(time.time() * 1000)}
+
+    return await base_get(path=us.loan, params=params)

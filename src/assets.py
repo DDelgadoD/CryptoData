@@ -55,7 +55,10 @@ async def get_assets_snap(client, op_type='SPOT'):
 
             for ld_asset in assets:
                 if ld_asset.startswith("LD"):
-                    assets[ld_asset[2:]] = assets[ld_asset[2:]] + assets[ld_asset]
+                    if ld_asset.endswith("2"):
+                        assets[ld_asset[2:-1]] = assets[ld_asset[2:-1]] + assets[ld_asset]
+                    else:
+                        assets[ld_asset[2:]] = assets[ld_asset[2:]] + assets[ld_asset]
                     ld_assets.append(ld_asset)
 
             for ld_asset in ld_assets:
